@@ -84,7 +84,7 @@ void Solution::Run()
 
 		std::cout << setw(6) << ++cnt;
 		std::cout << setw(14) << time;
-		if (ForegroundCompare(fg, result, Pr, Re, F1))
+		if (!result.empty() && ForegroundCompare(fg, result, Pr, Re, F1))
 		{
 			std::cout << setw(11) << Pr;
 			std::cout << setw(11) << Re;
@@ -105,7 +105,8 @@ void Solution::Run()
 		if (!ffd_fg.empty() && !vibe_fg.empty() && !fg.empty())
 		{
 			imshow("输入", input);
-			imshow("对比", result);
+			if(!result.empty())
+				imshow("对比", result);
 			//imshow("vibe前景蒙版", vibe_fg);
 			//imshow("帧差前景蒙版", ffd_fg);
 			imshow("最终前景蒙版", fg);

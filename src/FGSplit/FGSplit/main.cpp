@@ -8,12 +8,12 @@ using namespace std;
 
 int main()
 {
-	//VideoTest vt(R"(D:/MyDownload/BackgroundSplit-OpenCV-master/BackgroundSplit-OpenCV-master/Video/Camera Road 01.avi)");
+	//VideoTest vt("../../../data/video/Camera Road 01.avi");
 
-	CDW_2014_Test cdw(R"(D:\Ñ¸À×ÏÂÔØ\dataset2014\dataset\baseline\office)");
+	CDW_2014_Test cdw("../../../data/CDW-2014/dataset/baseline/office");
 	cdw.FromStart(-2);
 
-	Solution s(cdw);
+	Solution s(vt);
 
 	s.Run();
 
