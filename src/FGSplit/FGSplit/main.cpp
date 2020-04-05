@@ -13,7 +13,7 @@ int main()
 	CDW_2014_Test cdw("../../../data/CDW-2014/dataset/baseline/office");
 	cdw.FromStart(-2);
 
-	Solution s(vt);
+	Solution s(cdw);
 
 	s.Run();
 
