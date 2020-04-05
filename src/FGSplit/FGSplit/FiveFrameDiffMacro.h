@@ -1,0 +1,10 @@
+#ifndef _FiveFrameDiffMacro_h
+#define _FiveFrameDiffMacro_h
+
+#define MEDIAN_FILTER_SIZE		3		//中值滤波孔径大小
+
+#define FRAME_DIFF_THRESHOLD_1	8		// 差帧阈值T1
+
+#define FRAME_DIFF_THRESHOLD_2	90		// 8邻域阈值T2
+
+#endif _FiveFrameDiffMacro_h
