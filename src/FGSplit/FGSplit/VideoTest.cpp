@@ -34,6 +34,9 @@ cv::Mat VideoTest::getNextResult(int k)
 
 cv::Mat VideoTest::getNextInput(int k)
 {
+    if (!capture.isOpened())
+        return Mat();
+
     Mat frame;
 
     for (int i = 0; i < k; ++i)

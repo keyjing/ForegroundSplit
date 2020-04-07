@@ -1,8 +1,8 @@
-#ifndef _CDW_2014_Test_h
-#define _CDW_2014_Test_h
+#ifndef CDW_2014_TEST_H
+#define CDW_2014_TEST_H
 
-#include <string>
 #include "FrameSet.h"
+#include <string>
 
 /*		CDW-2014数据集子集目录信息参数		*/
 #define DEFAULT_FOLDER_INPUT	"/input/"			// 视频帧目录
@@ -17,20 +17,18 @@
 class CDW_2014_Test : public FrameSet
 {
 public:
-	CDW_2014_Test(const std::string& path);
+    CDW_2014_Test(const std::string& path);
 
-	// 通过 FrameSet 继承
-	virtual cv::Mat getNextInput(int k = 1) override;
+    // 通过 FrameSet 继承
+    virtual cv::Mat getNextInput(int k = 1) override;
 
-	// 通过 FrameSet 继承
-	virtual cv::Mat getNextResult(int k = 1) override;
+    // 通过 FrameSet 继承
+    virtual cv::Mat getNextResult(int k = 1) override;
 
-	void setId(int id);
-	void FromStart(int k = 0);		// 将指标 input_id 和 res_id 指向 start + k
+    void setId(int id);
+    int FromStart(int k = 0);		// 将指标 input_id 和 res_id 指向 start + k
 private:
-	int start_id, end_id, input_id, res_id;
+    int start_id, end_id, input_id, res_id;
 };
 
-
-
-#endif _CDW_2014_Test_h
+#endif // CDW_2014_TEST_H

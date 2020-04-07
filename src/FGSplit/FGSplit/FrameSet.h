@@ -1,5 +1,5 @@
-#ifndef _FrameSet_h
-#define _FrameSet_h
+#ifndef FRAMESET_H
+#define FRAMESET_H
 
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -16,17 +16,19 @@
 class FrameSet
 {
 public:
-	FrameSet(const std::string& str) : path(str) {};
+    FrameSet(const std::string& str) : path(str) {}
 
-	// 获取下一帧
-	virtual cv::Mat getNextInput(int k = 1) = 0;
+    virtual ~FrameSet() {}
 
-	virtual cv::Mat getNextResult(int k = 1) = 0;
+    // 获取下一帧
+    virtual cv::Mat getNextInput(int k = 1) = 0;
 
-	std::string getPath() const { return path; }
+    virtual cv::Mat getNextResult(int k = 1) = 0;
+
+    std::string getPath() const { return path; }
 
 private:
-	std::string path;
+    std::string path;
 };
 
 //===============================================================
@@ -40,7 +42,6 @@ private:
 // F1 = (2 x Pr x Re) / (Pr + Re)
 //
 //===============================================================
-bool ForegroundCompare(const cv::Mat& src, const cv::Mat& dist, float& Pr, float& Re, float& F1);
+bool ForegroundCompare(const cv::Mat& src, const cv::Mat& dist, double& Pr, double& Re, double& F1);
 
-
-#endif _FrameSet_h
+#endif // FRAMESET_H

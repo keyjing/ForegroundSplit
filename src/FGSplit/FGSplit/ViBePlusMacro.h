@@ -1,6 +1,5 @@
-#ifndef _ViBePlusMacro_h
-#define _ViBePlusMacro_h
-
+#ifndef VIBEPLUSMACRO_H
+#define VIBEPLUSMACRO_H
 
 /*		默认参数		*/
 #define DEFAULT_NUM_SAMPLES		20		// 默认样本数
@@ -37,7 +36,7 @@
 
 #define MAX_INNER_GRAD			50		// 邻居灰度最大梯度
 
-#define MINUS_BLINK_LEVEL		1		// 闪烁等级减少量 
+#define MINUS_BLINK_LEVEL		1		// 闪烁等级减少量
 
 #define ADD_BLINK_LEVEL			15		// 闪烁等级增加量
 
@@ -45,4 +44,4 @@
 
 #define MAX_BLINK_LEVEL			150		// 最大闪烁等级
 
-#endif _ViBePlusMacro_h
+#endif // VIBEPLUSMACRO_H

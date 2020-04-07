@@ -4,181 +4,375 @@
 #include "ViBePlus.h"
 #include "FiveFrameDiff.h"
 #include <queue>
-#include <opencv2\imgproc\types_c.h>
+#include <opencv2/imgproc/types_c.h>
+#include <iomanip>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
 
+void CalNewAve(double& ave, double val, int n)
+{
+    ave = (ave * (n - 1) + val) / n;
+}
+
 void Solution::Run()
 {
-	Mat frame_in, frame_res;
+    ofstream msgfile, resfile;
+    if (msg_save)
+        msgfile = ofstream(file_name_msg, ios::out);
 
-	ViBePlus vibeplus;
-	FiveFrameDiff ffd;
+    Mat frame_in, frame_res;
 
-	// 五帧差分法前两帧不输出
-	for (int i = 0; i < 2; ++i)
-	{
-		frame_in = fs.getNextInput();
-		ffd.Run(frame_in);
-	}
-	// 第二帧 Vibe+建模
-	vibeplus.Run(frame_in);
+    ViBePlus vibeplus;
+    FiveFrameDiff ffd;
 
-	// 结果帧跳过前两帧
-	fs.getNextResult(2);
+    // 五帧差分法前两帧不输出
+    for (int i = 0; i < 2; ++i)
+    {
+        frame_in = fs.getNextInput();
+        if (frame_in.empty())
+            return;
+        ffd.Run(frame_in);
+    }
+    // 第二帧 Vibe+建模
+    vibeplus.Run(frame_in);
 
-	// 保存第三、四帧，五帧差分法需要提前知道下两帧
-	queue<Mat> inque, resque;
-	for (int i = 0; i < 2; ++i)
-	{
-		frame_in = fs.getNextInput();
-		inque.push(frame_in);
-		ffd.Run(frame_in);
+    // 结果帧跳过前两帧
+    fs.getNextResult(2);
+    start_id += 2;
 
-		frame_res = fs.getNextResult();
-		resque.push(frame_res);
-	}
+    // 保存第三、四帧，五帧差分法需要提前知道下两帧
+    queue<Mat> inque, resque;
+    for (int i = 0; i < 2; ++i)
+    {
+        frame_in = fs.getNextInput();
+        inque.push(frame_in);
+        ffd.Run(frame_in);
 
-	// 程序运行时间统计变量
-	double time, start;
+        frame_res = fs.getNextResult();
+        resque.push(frame_res);
+    }
 
-	float Pr, Re, F1;
-	double Pr_last, Re_last, F1_last;
-	Pr_last = Re_last = F1_last = 0;
+    // 程序运行时间统计变量
+    double start, time_vibe, time_ffd, time_merge;
+    double time_ave_vibe, time_ave_ffd, time_ave_merge;
+    time_ave_vibe = time_ave_ffd = time_ave_merge = 0;
 
-	cout << "IMAGE ID    IIME(ms)      Pr(%)      Re(%)      F1(%)" << endl;
+    // ViBe+
+    double Pr_vibe, Re_vibe, F1_vibe;
+    double Pr_ave_vibe, Re_ave_vibe, F1_ave_vibe;
+    Pr_ave_vibe = Re_ave_vibe = F1_ave_vibe = 0;
 
-	while (!inque.empty())
-	{
-		// vibe结果、ffd结果、最终结果、当前处理输入帧、当前处理结果帧
-		Mat vibe_fg, ffd_fg, fg, input, result;
+    // ffd
+    double Pr_ffd, Re_ffd, F1_ffd;
+    double Pr_ave_ffd, Re_ave_ffd, F1_ave_ffd;
+    Pr_ave_ffd = Re_ave_ffd = F1_ave_ffd = 0;
 
-		start = static_cast<double>(getTickCount());
+    // merge
+    double Pr_merge, Re_merge, F1_merge;
+    double Pr_ave_merge, Re_ave_merge, F1_ave_merge;
+    Pr_ave_merge = Re_ave_merge = F1_ave_merge = 0;
 
-		// 从队列获取当前处理输入帧、结果帧
-		inque.front().copyTo(input);
-		inque.pop();
-		if (input.empty())
-			continue;
-		resque.front().copyTo(result);
-		resque.pop();
+    int part_cnt = part;
+    while (!inque.empty())
+    {
+        Pr_vibe = Re_vibe = F1_vibe = 0;
+        Pr_ffd = Re_ffd = F1_ffd = 0;
+        Pr_merge = Re_merge = F1_merge = 0;
 
-		// Vibe+从当前输入处理
-		vibe_fg = vibeplus.Run(input);
+        ++cnt;
+        // vibe+结果、ffd结果、最终结果、当前处理输入帧、当前处理结果帧
+        Mat vibe_fg, ffd_fg, fg, input, result;
 
-		// ffd从后两帧处理
-		frame_in = fs.getNextInput();
-		if (!frame_in.empty())
-		{
-			ffd_fg = ffd.Run(frame_in);
-			inque.push(frame_in);
+        //======  ViBe+ START  =======//
+        start = static_cast<double>(getTickCount());
 
-			frame_res = fs.getNextResult();
-			resque.push(frame_res);
-		}
+        // 从队列获取当前处理输入帧、结果帧
+        inque.front().copyTo(input);
+        inque.pop();
+        if (input.empty())
+            break;
+        resque.front().copyTo(result);
+        resque.pop();
 
-		fg = MergeFG(vibe_fg, ffd_fg);
+        // Vibe+从当前输入处理
+        vibe_fg = vibeplus.Run(input);
 
-		time = ((double)getTickCount() - start) / getTickFrequency() * 1000;
+        time_vibe = ((double)getTickCount() - start) / getTickFrequency() * 1000;
+        //======  ViBe+ MESSAGE  =======//
+        // 计算平局值
+        time_ave_vibe = (time_ave_vibe * (cnt - 1) + time_vibe) / cnt;
+        if (!result.empty() && ForegroundCompare(vibe_fg, result, Pr_vibe, Re_vibe, F1_vibe))
+        {
+            // 计算平局值
+            CalNewAve(Pr_ave_vibe, Pr_vibe, cnt);
+            CalNewAve(Re_ave_vibe, Re_vibe, cnt);
+            CalNewAve(F1_ave_vibe, F1_vibe, cnt);
 
-		std::cout << setw(6) << ++cnt;
-		std::cout << setw(14) << time;
-		if (!result.empty() && ForegroundCompare(fg, result, Pr, Re, F1))
-		{
-			std::cout << setw(11) << Pr;
-			std::cout << setw(11) << Re;
-			std::cout << setw(11) << F1;
+        }
+        //======  Vibe+ END =======//
 
-			// 计算平局值
-			Pr_last = (Pr_last * (cnt - 1) + Pr) / cnt;
-			Re_last = (Re_last * (cnt - 1) + Re) / cnt;
-			F1_last = (F1_last * (cnt - 1) + F1) / cnt;
-		}
-		//if(Pr < 1)
-		//{
-		//	imshow("对比", result);
-		//	imshow("最终前景蒙版", fg);
-		//}
-		std::cout << endl;
+        //======  ffd START  =======//
+        start = static_cast<double>(getTickCount());
 
-		if (!ffd_fg.empty() && !vibe_fg.empty() && !fg.empty())
-		{
-			imshow("输入", input);
-			if(!result.empty())
-				imshow("对比", result);
-			//imshow("vibe前景蒙版", vibe_fg);
-			//imshow("帧差前景蒙版", ffd_fg);
-			imshow("最终前景蒙版", fg);
-			//imshow("更新蒙版", vibeplus.getupdatemodel());
-		}
-		cv::waitKey(25);
-	}
-	cout << "Last Pr: " << Pr_last << endl;
-	cout << "Last Re: " << Re_last << endl;
-	cout << "Last F1: " << F1_last << endl;
+        // ffd从后两帧处理
+        frame_in = fs.getNextInput();
+        if (!frame_in.empty())
+        {
+            ffd_fg = ffd.Run(frame_in);
+            inque.push(frame_in);
+
+            frame_res = fs.getNextResult();
+            resque.push(frame_res);
+        }
+
+        time_ffd = ((double)getTickCount() - start) / getTickFrequency() * 1000;
+        //======  ffd MESSAGE  =======//
+        // 计算平局值
+        time_ave_ffd = (time_ave_ffd * (cnt - 1) + time_vibe) / cnt;
+        if (!result.empty() && ForegroundCompare(ffd_fg, result, Pr_ffd, Re_ffd, F1_ffd))
+        {
+            // 计算平局值
+            CalNewAve(Pr_ave_ffd, Pr_ffd, cnt);
+            CalNewAve(Re_ave_ffd, Re_ffd, cnt);
+            CalNewAve(F1_ave_ffd, F1_ffd, cnt);
+        }
+        //======  Vibe+ END =======//
+
+        //======  merge START  =======//
+        start = static_cast<double>(getTickCount());
+
+        fg = MergeFG(vibe_fg, ffd_fg);
+
+        time_merge = ((double)getTickCount() - start) / getTickFrequency() * 1000;
+        time_merge += time_vibe + time_ffd;
+        //======  merge MESSAGE  =======//
+        // 计算平局值
+        time_ave_merge = (time_ave_merge * (cnt - 1) + time_merge) / cnt;
+        if (!result.empty() && ForegroundCompare(fg, result, Pr_merge, Re_merge, F1_merge))
+        {
+            // 计算平局值
+            CalNewAve(Pr_ave_merge, Pr_merge, cnt);
+            CalNewAve(Re_ave_merge, Re_merge, cnt);
+            CalNewAve(F1_ave_merge, F1_merge, cnt);
+        }
+        //======  merge END =======//
+
+        if (showed_input && !input.empty())
+            imshow("输入", input);
+
+        if (showed_res_fg && !result.empty())
+            imshow("对比", result);
+
+        if (showed_viBe_fg && !vibe_fg.empty())
+            imshow("vibe前景蒙版", vibe_fg);
+
+        if (showed_vibe_up)
+            imshow("更新蒙版", vibeplus.getUpdateModel());
+
+        if (showed_ffd_fg && !ffd_fg.empty())
+            imshow("帧差前景蒙版", ffd_fg);
+
+        if (showed_output && !fg.empty())
+            imshow("最终前景蒙版", fg);
+
+        cv::waitKey(25);
+
+        if (--part_cnt > 0)
+            continue;
+        part_cnt = part;
+
+        stringstream ss;
+        ss << "======================================================\n";
+        // PRINT IMAGE NUMBER
+        ss << "NO: ";
+        ss << setw(4) << (cnt + start_id) << "  TIME[ms]      Pr[%]      Re[%]      F1[%]\n";
+
+        ss << "ViBe+   ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_vibe << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_vibe << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_vibe << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_vibe << " ";
+        ss << "\n";
+
+        ss << "FFD     ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_ffd << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_ffd << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_ffd << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_ffd << " ";
+        ss << "\n";
+
+        ss << "Merge   ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_merge << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_merge << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_merge << " ";
+        ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_merge << " ";
+        ss << "\n";
+
+        if (msg_prt)
+            cout << ss.str();
+
+        if (msg_save)
+            msgfile << ss.str();
+    }
+    msgfile.close();
+
+    stringstream ss;
+
+    ss << "======================================================\n";
+    ss << "AVERAGE " << "  TIME[ms]      Pr[%]      Re[%]      F1[%]\n";
+
+    ss << "ViBe+   ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_ave_vibe << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_ave_vibe << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_ave_vibe << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_ave_vibe << " ";
+    ss << "\n";
+
+    ss << "FFD     ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_ave_ffd << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_ave_ffd << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_ave_ffd << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_ave_ffd << " ";
+    ss << "\n";
+
+    ss << "Merge   ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << time_ave_merge << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Pr_ave_merge << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << Re_ave_merge << " ";
+    ss << setw(10) << setiosflags(ios::fixed) << setprecision(2) << F1_ave_merge << " ";
+    ss << "\n";
+
+    cout << ss.str();
+    if (res_save)
+    {
+        if (res_save)
+            resfile = ofstream(file_name_res, ios::out);
+        resfile << ss.str();
+        resfile.close();
+    }
 }
 
 cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
 {
-	if (vibe_fg.empty())
-		return ffd_fg;
-	if (ffd_fg.empty())
-		return vibe_fg;
+    if (vibe_fg.empty())
+        return ffd_fg;
+    if (ffd_fg.empty())
+        return vibe_fg;
 
-	Mat fg;
-	vibe_fg.copyTo(fg);
+    Mat fg;
+    vibe_fg.copyTo(fg);
 
-	// 合并两种前景蒙版
-	for (int i = 0; i < vibe_fg.rows; ++i)
-	{
-		for (int j = 0; j < vibe_fg.rows; ++j)
-		{
-			if (ffd_fg.at<uchar>(i, j) == 255)
-				fg.at<uchar>(i, j) = 255;
-		}
-	}
+    // 合并两种前景蒙版
+    for (int i = 0; i < vibe_fg.rows; ++i)
+    {
+        for (int j = 0; j < vibe_fg.rows; ++j)
+        {
+            if (ffd_fg.at<uchar>(i, j) == 255)
+                fg.at<uchar>(i, j) = 255;
+        }
+    }
 
-	Mat imgtmp;
-	vector<vector<Point>> contours;
-	vector<Vec4i> hierarchy;
-	fg.copyTo(imgtmp);
+    Mat imgtmp;
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    fg.copyTo(imgtmp);
 
-	// 提取轮廓
-	findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    // 提取轮廓
+    findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-	// 遍历轮廓
-	for (int i = 0; i < contours.size(); ++i)
-	{
-		// 一级父轮廓
-		int father = hierarchy[i][3];
-		// 二级父轮廓
-		int grandpa = -1;
-		if (father >= 0)
-			grandpa = hierarchy[father][3];
-
-
-		// 有一级父轮廓而没有二级父轮廓，说明其为前景孔洞
-		if (father >= 0 && grandpa < 0)
-		{
-			// 轮廓区域大小
-			double area = contourArea(contours[i]);
-
-			// 孔洞面积小于默认值的进行填充
-			if (area <= FILL_MERGE_FG_AREA)
-				drawContours(fg, contours, i, Scalar(255), -1);
-		}
-
-		// 无父轮廓，说明该轮廓是最外围轮廓，即前景斑点区域，抹除过小的前景斑点
-		if (father < 0)
-		{
-			if (contourArea(contours[i]) < DEL_MERGE_FG_AREA)
-				drawContours(fg, contours, i, Scalar(0), -1);
-		}
-	}
+    // 遍历轮廓
+    for (int i = 0; i < contours.size(); ++i)
+    {
+        // 一级父轮廓
+        int father = hierarchy[i][3];
+        // 二级父轮廓
+        int grandpa = -1;
+        if (father >= 0)
+            grandpa = hierarchy[father][3];
 
 
-	return fg;
+        // 有一级父轮廓而没有二级父轮廓，说明其为前景孔洞
+        if (father >= 0 && grandpa < 0)
+        {
+            // 轮廓区域大小
+            double area = contourArea(contours[i]);
+
+            // 孔洞面积小于默认值的进行填充
+            if (area <= FILL_MERGE_FG_AREA)
+                drawContours(fg, contours, i, Scalar(255), -1);
+        }
+
+        // 无父轮廓，说明该轮廓是最外围轮廓，即前景斑点区域，抹除过小的前景斑点
+        if (father < 0)
+        {
+            if (contourArea(contours[i]) < DEL_MERGE_FG_AREA)
+                drawContours(fg, contours, i, Scalar(0), -1);
+        }
+    }
+
+    return fg;
 }
 
+void Solution::setShowed_vibe_up(bool value)
+{
+    showed_vibe_up = value;
+}
 
+void Solution::setFile_name_res(const std::string& value)
+{
+    file_name_res = value;
+}
+
+void Solution::setFile_name_msg(const std::string& value)
+{
+    file_name_msg = value;
+}
+
+void Solution::setRes_save(bool value)
+{
+    res_save = value;
+}
+
+void Solution::setMsg_save(bool value)
+{
+    msg_save = value;
+}
+
+void Solution::setMsg_prt(bool value)
+{
+    msg_prt = value;
+}
+
+void Solution::setPart(int value)
+{
+    part = value;
+    if (part <= 0)
+        part = 1;
+}
+
+void Solution::setShowed_res_fg(bool value)
+{
+    showed_res_fg = value;
+}
+
+void Solution::setShowed_output(bool value)
+{
+    showed_output = value;
+}
+
+void Solution::setShowed_input(bool value)
+{
+    showed_input = value;
+}
+
+void Solution::setShowed_ffd_fg(bool value)
+{
+    showed_ffd_fg = value;
+}
+
+void Solution::setShowed_viBe_fg(bool value)
+{
+    showed_viBe_fg = value;
+}
