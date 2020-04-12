@@ -50,6 +50,8 @@ int main()
     bool showed_output = false;
     bool save_output = false;
     bool showed_result = false;
+    bool showed_merge = false;
+    bool save_merge = false;
     int part = 0;
     bool msg_prt = false;
     string save_folder = "./";
@@ -92,6 +94,10 @@ int main()
             save_output = (line[k] == '1');
         else if ((k = cmpOptStr(line, "SHOWED_RESULT")) > 0)
             showed_result = (line[k] == '1');
+        else if ((k = cmpOptStr(line, "SHOWED_MERGE")) > 0)
+            showed_merge = (line[k] == '1');
+        else if ((k = cmpOptStr(line, "SAVE_MERGE")) > 0)
+            save_merge = (line[k] == '1');
         else if ((k = cmpOptStr(line, "PARTITION")) > 0)
         {
             part = 0;
@@ -109,6 +115,8 @@ int main()
             msg_save = (line[k] == '1');
         else if ((k = cmpOptStr(line, "RES_SAVE")) > 0)
             res_save = (line[k] == '1');
+        else
+            cout << "Unknown Command." << endl;
     }
     conf.close();
 
@@ -137,6 +145,8 @@ int main()
     s.setShowed_output(showed_output);
     s.setSave_output(save_output);
     s.setShowed_result(showed_result);
+    s.setShowed_merge(showed_merge);
+    s.setSave_merge(save_merge);
     s.setPart(part);
     s.setMsg_prt(msg_prt);
     s.setMsg_save(msg_save);

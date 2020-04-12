@@ -39,6 +39,10 @@ public:
 
     void setShowed_result(bool value);
 
+    void setShowed_merge(bool value);
+
+    void setSave_merge(bool value);
+
     void setPart(int value);
 
     void setMsg_prt(bool value);
@@ -50,7 +54,7 @@ public:
     void setFile_name(const std::string& value);
 
 private:
-    cv::Mat MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg);		// 合并两种算法结果
+    cv::Mat MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge);		// 合并两种算法结果
 
     FrameSet& fs;
     int cnt;
@@ -66,6 +70,8 @@ private:
     bool showed_output = false;
     bool save_output = false;
     bool showed_result = false;
+    bool showed_merge = false;
+    bool save_merge = false;
 
     int part = 1;
 

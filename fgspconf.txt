@@ -13,7 +13,7 @@ PATH=../../../data/CDW-2014/dataset/baseline/office
 CDW_QK=1
 
 # 是否显示和保存ViBe+法前景蒙版，0不显示，1只显示分割蒙版，2包括更新蒙版也显示
-SHOWED_VIBE=0
+SHOWED_VIBE=1
 SAVE_VIBE=1
 
 # 是否显示和保存五帧差分法蒙版，0不显示，1显示
@@ -22,6 +22,10 @@ SAVE_FFD=1
 
 # 是否显示输入帧图像，0不显示，1显示
 SHOWED_INPUT=1
+
+# 是否显示和输出交蒙版
+SHOWED_MERGE=1
+SAVE_MERGE=1
 
 # 是否显示和保存最终前景蒙版，0不显示，1显示
 SHOWED_OUTPUT=1

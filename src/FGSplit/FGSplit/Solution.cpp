@@ -86,7 +86,7 @@ void Solution::Run()
     {
         ++cnt;
         // vibe+结果、ffd结果、最终结果、当前处理输入帧、当前处理结果帧
-        Mat vibe_fg, ffd_fg, fg, input, result;
+        Mat vibe_fg, ffd_fg, fg, merge, input, result;
 
         //======  ViBe+ START  =======//
         start = static_cast<double>(getTickCount());
@@ -146,7 +146,7 @@ void Solution::Run()
         //======  merge START  =======//
         start = static_cast<double>(getTickCount());
 
-        fg = MergeFG(vibe_fg, ffd_fg);
+        fg = MergeFG(vibe_fg, ffd_fg, merge);
 
         time_merge = ((double)getTickCount() - start) / getTickFrequency() * 1000;
         time_merge += time_vibe + time_ffd;
@@ -177,6 +177,9 @@ void Solution::Run()
         if (showed_ffd_fg && !ffd_fg.empty())
             imshow("帧差前景蒙版", ffd_fg);
 
+        if (showed_merge && !merge.empty())
+            imshow("交运算蒙版", merge);
+
         if (showed_output && !fg.empty())
             imshow("最终前景蒙版", fg);
 
@@ -199,6 +202,9 @@ void Solution::Run()
 
         if (save_ffd_fg && !ffd_fg.empty())
             imwrite(file_name + "/" + ntos.str() + "_ffd.jpg", ffd_fg);
+
+        if (save_merge && !merge.empty())
+            imwrite(file_name + "/" + ntos.str() + "_merge.jpg", merge);
 
         if (save_output && !fg.empty())
             imwrite(file_name + "/" + ntos.str() + "_output.jpg", fg);
@@ -275,7 +281,7 @@ void Solution::Run()
     }
 }
 
-cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
+cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge)
 {
     if (vibe_fg.empty())
         return ffd_fg;
@@ -285,8 +291,11 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
     Mat fg;
     vibe_fg.copyTo(fg);
 
+    merge = Mat::zeros(vibe_fg.size(), CV_8UC1);
+
     // 膨胀
     Mat imgtmp;
+
     Mat ele = getStructuringElement(MORPH_RECT, Size(DILATION_SIZE, DILATION_SIZE));
     dilate(vibe_fg, imgtmp, ele);
 
@@ -296,6 +305,16 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
         for (int j = 0; j < vibe_fg.cols; ++j)
         {
             if (imgtmp.at<uchar>(i, j) == 255 && ffd_fg.at<uchar>(i, j) == 255)
+                //fg.at<uchar>(i, j) = 255;
+                merge.at<uchar>(i, j) = 255;
+        }
+    }
+
+    for (int i = 0; i < vibe_fg.rows; ++i)
+    {
+        for (int j = 0; j < vibe_fg.cols; ++j)
+        {
+            if (merge.at<uchar>(i, j) == 255)
                 fg.at<uchar>(i, j) = 255;
         }
     }
@@ -372,6 +391,11 @@ void Solution::setMsg_prt(bool value)
     msg_prt = value;
 }
 
+void Solution::setSave_merge(bool value)
+{
+    save_merge = value;
+}
+
 void Solution::setPart(int value)
 {
     part = value;
@@ -382,6 +406,11 @@ void Solution::setPart(int value)
 void Solution::setShowed_result(bool value)
 {
     showed_result = value;
+}
+
+void Solution::setShowed_merge(bool value)
+{
+    showed_merge = value;
 }
 
 void Solution::setSave_output(bool value)
