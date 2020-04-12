@@ -66,6 +66,10 @@ int main()
     {
         if (line.length() == 0 || line[0] == '#')
             continue;
+        // 换行符
+        if(line[line.length() - 1] == '\r')
+            line = line.substr(0, line.length() - 1);
+        
         if ((k = cmpOptStr(line, "CHOICE_CDW")) > 0)
             choice = (line[k] == '1');
         else if ((k = cmpOptStr(line, "PATH")) > 0)
@@ -170,8 +174,6 @@ int main()
         string command = "mkdir ";
         if (save_folder.length() != 0)
         {
-            if(save_folder[save_folder.length() - 1] == '\r')
-                save_folder = save_folder.substr(0, save_folder.length() - 1);
             // linux下
             if (save_folder[0] == '.' || save_folder[0] == '/')
             {
