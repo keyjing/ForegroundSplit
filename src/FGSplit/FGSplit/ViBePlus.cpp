@@ -1,4 +1,4 @@
-#include "ViBePlus.h"
+﻿#include "ViBePlus.h"
 #include <iostream>
 #include <opencv2/imgproc/types_c.h>
 

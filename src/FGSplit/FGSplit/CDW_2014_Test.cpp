@@ -1,4 +1,4 @@
-#include "CDW_2014_Test.h"
+﻿#include "CDW_2014_Test.h"
 #include <opencv2/highgui/highgui_c.h>
 #include <fstream>
 

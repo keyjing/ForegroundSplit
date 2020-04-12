@@ -1,4 +1,4 @@
-#include "FiveFrameDiff.h"
+ï»¿#include "FiveFrameDiff.h"
 #include <opencv2/imgproc/types_c.h>
 
 using namespace std;
@@ -12,39 +12,39 @@ cv::Mat FiveFrameDiff::Run(cv::Mat img)
         return Mat();
     }
 
-    // Ô¤´¦Àí£¬ÖĞÖµÂË²¨¡¢Í¼Ïñ»Ò¶È»¯
+    // é¢„å¤„ç†ï¼Œä¸­å€¼æ»¤æ³¢ã€å›¾åƒç°åº¦åŒ–
     Mat frame = FirstProcess(img);
 
-    // Î´ÂúÎåÖ¡Ê±²»½øĞĞ²î·Ö
+    // æœªæ»¡äº”å¸§æ—¶ä¸è¿›è¡Œå·®åˆ†
     if (capacity != 0)
     {
-        // ±£´æµ½ĞòÁĞÏòÁ¿
+        // ä¿å­˜åˆ°åºåˆ—å‘é‡
         frame.copyTo(frame_vec[5 - capacity]);
-        // ¼ÆËã¸ÃÖ¡8ÁÚÓòºÍ
+        // è®¡ç®—è¯¥å¸§8é‚»åŸŸå’Œ
 //        CalNeighSum(5 - capacity);
-        // ¸ÕºÃÂúÎåÖ¡¿É¿ªÊ¼
+        // åˆšå¥½æ»¡äº”å¸§å¯å¼€å§‹
         if (--capacity == 0)
             goto startpos;
         return Mat();
     }
     else
     {
-        // Ìæ»»µô×îÔçÒ»Ö¡
+        // æ›¿æ¢æ‰æœ€æ—©ä¸€å¸§
         int oldest = (id + 5 - 2) % 5;
         frame.copyTo(frame_vec[oldest]);
-        // ¼ÆËã¸ÃÖ¡8ÁÚÓòºÍ
+        // è®¡ç®—è¯¥å¸§8é‚»åŸŸå’Œ
 //        CalNeighSum(oldest);
         id = (id + 1) % 5;
     }
 startpos:
-    // ±£´æÏÂ±ê
+    // ä¿å­˜ä¸‹æ ‡
     int index[5];
     for (int i = 0; i < 5; ++i)
         index[i] = (id + 5 - 2 + i) % 5;
 
     Mat fgModel = Mat::zeros(frame_vec[0].size(), CV_8UC1);
 
-    // ²î·ÖÔËËã diffs[4][rows][cols]
+    // å·®åˆ†è¿ç®— diffs[4][rows][cols]
     vector<vector<vector<bool>>> diffs(4, vector<vector<bool>>(frame.rows, vector<bool>(frame.cols, false)));
     for (int i = 1; i < frame.rows - 1; ++i)
     {
@@ -52,11 +52,11 @@ startpos:
         {
             for (int k = 0; k < 4; ++k)
             {
-                // Ğ¡ÓÚãĞÖµT2µÄÎª±³¾°µã
+                // å°äºé˜ˆå€¼T2çš„ä¸ºèƒŒæ™¯ç‚¹
 //                if (neighSum[index[k + 1]][i][j] <= FRAME_DIFF_THRESHOLD_2)
 //                    continue;
                 uchar res = abs(frame_vec[index[k]].at<uchar>(i, j) - frame_vec[index[k + 1]].at<uchar>(i, j));
-                // ´óÓÚãĞÖµT1ÎªÇ°¾°µã
+                // å¤§äºé˜ˆå€¼T1ä¸ºå‰æ™¯ç‚¹
                 if (res > FRAME_DIFF_THRESHOLD_1)
                     diffs[k][i][j] = true;
             }
@@ -72,18 +72,18 @@ startpos:
         }
     }
 
-    // ºóÆÚ´¦Àí£¬°ßµãÈ¥³ı£¬¿×¶´Ìî³ä
+    // åæœŸå¤„ç†ï¼Œæ–‘ç‚¹å»é™¤ï¼Œå­”æ´å¡«å……
     return FinalProcess(fgModel);
 }
 
-// Ô¤´¦Àí£¬ÖĞÖµÂË²¨¡¢Í¼Ïñ»Ò¶È»¯
+// é¢„å¤„ç†ï¼Œä¸­å€¼æ»¤æ³¢ã€å›¾åƒç°åº¦åŒ–
 Mat FiveFrameDiff::FirstProcess(Mat img)
 {
-    // ÖĞÖµÂË²¨
+    // ä¸­å€¼æ»¤æ³¢
     Mat imgtmp;
     medianBlur(img, imgtmp, MEDIAN_FILTER_SIZE);
 
-    // Í¼Ïñ»Ò¶È»¯
+    // å›¾åƒç°åº¦åŒ–
     if (img.channels() == 3)
     {
         Mat res;
@@ -94,7 +94,7 @@ Mat FiveFrameDiff::FirstProcess(Mat img)
         return imgtmp;
 }
 
-// ºóÆÚ´¦Àí£¬°ßµãÈ¥³ı£¬¿×¶´Ìî³ä
+// åæœŸå¤„ç†ï¼Œæ–‘ç‚¹å»é™¤ï¼Œå­”æ´å¡«å……
 Mat FiveFrameDiff::FinalProcess(Mat img)
 {
     Mat imgtmp, fg;
@@ -103,32 +103,32 @@ Mat FiveFrameDiff::FinalProcess(Mat img)
     img.copyTo(imgtmp);
     img.copyTo(fg);
 
-    // ÌáÈ¡ÂÖÀª
+    // æå–è½®å»“
     findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-    // ±éÀúÂÖÀª
+    // éå†è½®å»“
     for (int i = 0; i < contours.size(); ++i)
     {
-        // Ò»¼¶¸¸ÂÖÀª
+        // ä¸€çº§çˆ¶è½®å»“
         int father = hierarchy[i][3];
-        // ¶ş¼¶¸¸ÂÖÀª
+        // äºŒçº§çˆ¶è½®å»“
         int grandpa = -1;
         if (father >= 0)
             grandpa = hierarchy[father][3];
 
 
-        // ÓĞÒ»¼¶¸¸ÂÖÀª¶øÃ»ÓĞ¶ş¼¶¸¸ÂÖÀª£¬ËµÃ÷ÆäÎªÇ°¾°¿×¶´
+        // æœ‰ä¸€çº§çˆ¶è½®å»“è€Œæ²¡æœ‰äºŒçº§çˆ¶è½®å»“ï¼Œè¯´æ˜å…¶ä¸ºå‰æ™¯å­”æ´
         if (father >= 0 && grandpa < 0)
         {
-            // ÂÖÀªÇøÓò´óĞ¡
+            // è½®å»“åŒºåŸŸå¤§å°
             double area = contourArea(contours[i]);
 
-            // ¿×¶´Ãæ»ıĞ¡ÓÚÄ¬ÈÏÖµµÄ½øĞĞÌî³ä
+            // å­”æ´é¢ç§¯å°äºé»˜è®¤å€¼çš„è¿›è¡Œå¡«å……
             if (area <= FILL_FFD_FG_AREA)
                 drawContours(fg, contours, i, Scalar(255), -1);
         }
 
-        // ÎŞ¸¸ÂÖÀª£¬ËµÃ÷¸ÃÂÖÀªÊÇ×îÍâÎ§ÂÖÀª£¬¼´Ç°¾°°ßµãÇøÓò£¬Ä¨³ı¹ıĞ¡µÄÇ°¾°°ßµã
+        // æ— çˆ¶è½®å»“ï¼Œè¯´æ˜è¯¥è½®å»“æ˜¯æœ€å¤–å›´è½®å»“ï¼Œå³å‰æ™¯æ–‘ç‚¹åŒºåŸŸï¼ŒæŠ¹é™¤è¿‡å°çš„å‰æ™¯æ–‘ç‚¹
         if (father < 0)
         {
             if (contourArea(contours[i]) < DEL_FFD_FG_AREA)
@@ -141,10 +141,10 @@ Mat FiveFrameDiff::FinalProcess(Mat img)
 
 
 /*
-// ¼ÆËã¸ÃÖ¡8ÁÚÓòºÍ
+// è®¡ç®—è¯¥å¸§8é‚»åŸŸå’Œ
 void FiveFrameDiff::CalNeighSum(int k)
 {
-    // ³õÊ¼»¯£¬·ÖÅäÄÚ´æ
+    // åˆå§‹åŒ–ï¼Œåˆ†é…å†…å­˜
     if (neighSum == nullptr)
     {
         if (frame_vec[k].empty())
@@ -165,7 +165,7 @@ void FiveFrameDiff::CalNeighSum(int k)
         }
     }
 
-    // ¼ÆËãĞòÁĞÏòÁ¿ÖĞµÚkÖ¡µÄÁÚÓòºÍ
+    // è®¡ç®—åºåˆ—å‘é‡ä¸­ç¬¬kå¸§çš„é‚»åŸŸå’Œ
     for (int x = 1; x < frame_vec[k].rows - 1; ++x)
     {
         for (int y = 1; y < frame_vec[k].cols - 1; ++y)

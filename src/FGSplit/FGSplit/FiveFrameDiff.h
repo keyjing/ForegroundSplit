@@ -1,4 +1,4 @@
-#ifndef FIVEFRAMEDIFF_H
+ï»¿#ifndef FIVEFRAMEDIFF_H
 #define FIVEFRAMEDIFF_H
 
 #include <opencv2/opencv.hpp>
@@ -11,20 +11,20 @@ public:
 
     ~FiveFrameDiff() {} //{ delete neighSum; }
 
-    cv::Mat Run(cv::Mat img);		// Ö´ĞĞÎåÖ¡²î·Ö·¨£¬·µ»ØÇ°¾°ÃÉ°æ
+    cv::Mat Run(cv::Mat img);		// æ‰§è¡Œäº”å¸§å·®åˆ†æ³•ï¼Œè¿”å›å‰æ™¯è’™ç‰ˆ
 
 private:
-    //void CalNeighSum(int k);		// ¼ÆËãÁÚÓòºÍ;
+    //void CalNeighSum(int k);		// è®¡ç®—é‚»åŸŸå’Œ;
 
-    cv::Mat FirstProcess(cv::Mat img);  // Ô¤´¦Àí£¬ÖĞÖµÂË²¨¡¢Í¼Ïñ»Ò¶È»¯
+    cv::Mat FirstProcess(cv::Mat img);  // é¢„å¤„ç†ï¼Œä¸­å€¼æ»¤æ³¢ã€å›¾åƒç°åº¦åŒ–
 
-    cv::Mat FinalProcess(cv::Mat img);  // ºóÆÚ´¦Àí£¬°ßµãÈ¥³ı£¬¿×¶´Ìî³ä
+    cv::Mat FinalProcess(cv::Mat img);  // åæœŸå¤„ç†ï¼Œæ–‘ç‚¹å»é™¤ï¼Œå­”æ´å¡«å……
 
-    cv::Mat frame_vec[5];           // ´æ·ÅÎåÖ¡ĞòÁĞÏòÁ¿
-    int id;							// µ±Ç°Ö¡ËùÔÚÏòÁ¿ÖĞÏÂ±ê£¬³õÊ¼Îª2
+    cv::Mat frame_vec[5];           // å­˜æ”¾äº”å¸§åºåˆ—å‘é‡
+    int id;							// å½“å‰å¸§æ‰€åœ¨å‘é‡ä¸­ä¸‹æ ‡ï¼Œåˆå§‹ä¸º2
     int capacity;
 
-    //int*** neighSum;				// 8ÁÚÓòÖ®ºÍ
+    //int*** neighSum;				// 8é‚»åŸŸä¹‹å’Œ
 
     int c_xoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };
     int c_yoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };

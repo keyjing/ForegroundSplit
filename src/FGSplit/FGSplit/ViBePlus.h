@@ -1,4 +1,4 @@
-#ifndef VIBEPLUS_H
+ï»¿#ifndef VIBEPLUS_H
 #define VIBEPLUS_H
 
 #include <opencv2/opencv.hpp>
@@ -14,55 +14,55 @@ public:
 
     ~ViBePlus(void);
 
-    cv::Mat Run(cv::Mat img);	// Ö´ĞĞVibe+Ëã·¨£¬Êä³öÃÉ°æ
+    cv::Mat Run(cv::Mat img);	// æ‰§è¡ŒVibe+ç®—æ³•ï¼Œè¾“å‡ºè’™ç‰ˆ
 
-    cv::Mat getSegModel();		// ·µ»Ø·Ö¸îÃÉ°æ
-    cv::Mat getUpdateModel();	// ·µ»Ø¸üĞÂÃÉ°æ
+    cv::Mat getSegModel();		// è¿”å›åˆ†å‰²è’™ç‰ˆ
+    cv::Mat getUpdateModel();	// è¿”å›æ›´æ–°è’™ç‰ˆ
 
 private:
-    void FrameCapture(cv::Mat img);	// ·ÖRGBºÍ»Ò¶È¸ñÊ½´æ´¢Í¼Ïñ
+    void FrameCapture(cv::Mat img);	// åˆ†RGBå’Œç°åº¦æ ¼å¼å­˜å‚¨å›¾åƒ
 
-    void InitMemory();	// ·ÖÅäÄÚ´æ
+    void InitMemory();	// åˆ†é…å†…å­˜
 
-    void InitModel();	// ³õÊ¼»¯±³¾°Ä£ĞÍ
+    void InitModel();	// åˆå§‹åŒ–èƒŒæ™¯æ¨¡å‹
 
-    void ExtractBG();		// ÌáÈ¡·Ö¸îÃÉ°æ
+    void ExtractBG();		// æå–åˆ†å‰²è’™ç‰ˆ
 
-    void CalUpdateModel();	// ¼ÆËã¸üĞÂÃÉ°æ
+    void CalUpdateModel();	// è®¡ç®—æ›´æ–°è’™ç‰ˆ
 
-    void UpdateModel();		// ¸üĞÂ±³¾°Ä£ĞÍs
+    void UpdateModel();		// æ›´æ–°èƒŒæ™¯æ¨¡å‹s
 
-    void UpdatePixSampleAveAndSumSqr(int i, int j);		// ¸üĞÂÑù±¾µã¾ùÖµ¡¢·½²î
+    void UpdatePixSampleAveAndSumSqr(int i, int j);		// æ›´æ–°æ ·æœ¬ç‚¹å‡å€¼ã€æ–¹å·®
 
-    int num_samples;	// Ñù±¾Êı
-    int min_match;		// #min²ÎÊı
-    int radius;			// °ë¾¶
-    int rand_sam;		// ²ÉÑù¸ÅÂÊ
+    int num_samples;	// æ ·æœ¬æ•°
+    int min_match;		// #minå‚æ•°
+    int radius;			// åŠå¾„
+    int rand_sam;		// é‡‡æ ·æ¦‚ç‡
 
-    cv::Mat frame_rgb;		// µ±Ç°Ö¡Í¼Ïñ RGB°æ±¾
-    cv::Mat frame_gray;		// »Ò¶ÈÍ¼Ïñ°æ±¾
-    int Channels;		// Í¨µÀÊı£¬RGBÎª3£¬»Ò¶ÈÎª1
+    cv::Mat frame_rgb;		// å½“å‰å¸§å›¾åƒ RGBç‰ˆæœ¬
+    cv::Mat frame_gray;		// ç°åº¦å›¾åƒç‰ˆæœ¬
+    int Channels;		// é€šé“æ•°ï¼ŒRGBä¸º3ï¼Œç°åº¦ä¸º1
 
-    unsigned char**** samples_rgb = nullptr;	// RGBÏÂÑù±¾¿â
-    unsigned char*** samples_gray = nullptr;	// »Ò¶ÈÏÂÑù±¾¿â
+    unsigned char**** samples_rgb = nullptr;	// RGBä¸‹æ ·æœ¬åº“
+    unsigned char*** samples_gray = nullptr;	// ç°åº¦ä¸‹æ ·æœ¬åº“
 
-    double** samples_ave;		// Ñù±¾¼¯¾ùÖµ
-    double** samples_sumSqr;	// Ñù±¾¼¯·½²î
+    double** samples_ave;		// æ ·æœ¬é›†å‡å€¼
+    double** samples_sumSqr;	// æ ·æœ¬é›†æ–¹å·®
 
-    int** samples_fgCnt;		// Ñù±¾Á¬ĞøÇ°¾°¼ÆÊı
+    int** samples_fgCnt;		// æ ·æœ¬è¿ç»­å‰æ™¯è®¡æ•°
 
-    bool** samples_bgInner;		// Ñù±¾ÊÇ·ñÎª±³¾°±ßÔµ
-    int** samples_innerState;	// Ñù±¾°ËÁÚÓò×´Ì¬
+    bool** samples_bgInner;		// æ ·æœ¬æ˜¯å¦ä¸ºèƒŒæ™¯è¾¹ç¼˜
+    int** samples_innerState;	// æ ·æœ¬å…«é‚»åŸŸçŠ¶æ€
 
-    int** samples_bLinkLevel;	// Ñù±¾ÉÁË¸µÈ¼¶
+    int** samples_bLinkLevel;	// æ ·æœ¬é—ªçƒç­‰çº§
 
-    int** samples_maxInnerGrad;	// Ñù±¾ÁÚÓòÌİ¶È×î´óÖµ
+    int** samples_maxInnerGrad;	// æ ·æœ¬é‚»åŸŸæ¢¯åº¦æœ€å¤§å€¼
 
-    cv::Mat segModel;		// ·Ö¸îÃÉ°æ
-    cv::Mat updateModel;	// ¸üĞÂÃÉ°æ
+    cv::Mat segModel;		// åˆ†å‰²è’™ç‰ˆ
+    cv::Mat updateModel;	// æ›´æ–°è’™ç‰ˆ
 
-    int c_xoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };		// xµÄÁÚ¾Óµã
-    int c_yoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };		// yµÄÁÚ¾Óµã
+    int c_xoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };		// xçš„é‚»å±…ç‚¹
+    int c_yoff[9] = { -1,  0,  1, -1, 1, -1, 0, 1, 0 };		// yçš„é‚»å±…ç‚¹
 };
 
 #endif // VIBEPLUS_H

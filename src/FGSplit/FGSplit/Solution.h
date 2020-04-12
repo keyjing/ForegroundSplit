@@ -1,12 +1,12 @@
-#ifndef SOLUTION_H
+ï»¿#ifndef SOLUTION_H
 #define SOLUTION_H
 
 #include "FrameSet.h"
 
-#define DILATION_SIZE           5       // ÅòÕÍ´óĞ¡
+#define DILATION_SIZE           5       // è†¨èƒ€å¤§å°
 
-#define FILL_MERGE_FG_AREA		20		// ºÏ²¢ºóÌî³äµÄÇ°¾°¿Õ¶´´óĞ¡
-#define	DEL_MERGE_FG_AREA		10		// ºÏ²¢ºóÄ¨³ıµÄÇ°¾°°ßµã´óĞ¡
+#define FILL_MERGE_FG_AREA		20		// åˆå¹¶åå¡«å……çš„å‰æ™¯ç©ºæ´å¤§å°
+#define	DEL_MERGE_FG_AREA		10		// åˆå¹¶åæŠ¹é™¤çš„å‰æ™¯æ–‘ç‚¹å¤§å°
 
 class Solution
 {
@@ -54,7 +54,7 @@ public:
     void setFile_name(const std::string& value);
 
 private:
-    cv::Mat MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge);		// ºÏ²¢Á½ÖÖËã·¨½á¹û
+    cv::Mat MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge);		// åˆå¹¶ä¸¤ç§ç®—æ³•ç»“æœ
 
     FrameSet& fs;
     int cnt;

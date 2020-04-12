@@ -1,4 +1,4 @@
-#include "FrameSet.h"
+﻿#include "FrameSet.h"
 #include <opencv2/imgproc/types_c.h>
 
 using namespace cv;
@@ -60,7 +60,7 @@ bool ForegroundCompare(const cv::Mat& src, const cv::Mat& dist, double& Pr, doub
     if (Pr + Re != 0)
         F1 = (2 * Pr * Re) / (Pr + Re);
 
-    // ת��Ϊ�ٷֱ�
+    // 转化为百分比
     Pr *= 100;
     Re *= 100;
     F1 *= 100;

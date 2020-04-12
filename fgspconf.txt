@@ -1,50 +1,50 @@
-# ���������ļ�
-# ��'#'��ͷΪע���У��Ⱥ�ǰ�����ո�
+﻿# 程序配置文件
+# 以'#'开头为注释行，等号前后不留空格
 
-# CHOICE_CDW: 0Ϊѡ����Ƶ��ʽ��1Ϊѡ��CDW-2014�����Ӽ�
+# CHOICE_CDW: 0为选择视频格式，1为选择CDW-2014数据子集
 CHOICE_CDW=1
 
-# PATH: ��ȡ�ļ���λ�ã����·�������·��
-# ��Ƶ�ļ���"../data/videos/Camera Road 01.avi"
-# CDW-2014�����Ӽ���"../data/CDW-2014/dataset/baseline/office"
+# PATH: 读取文件的位置，相对路径或绝对路径
+# 视频文件如"../data/videos/Camera Road 01.avi"
+# CDW-2014数据子集如"../data/CDW-2014/dataset/baseline/office"
 PATH=../../../data/CDW-2014/dataset/baseline/office
 
-# CDW_2014���ݼ��Ƿ���н���Ա��ɰ濪ʼ��0���ǣ�1��
+# CDW_2014数据集是否从有结果对比蒙版开始，0不是，1是
 CDW_QK=1
 
-# �Ƿ���ʾ�ͱ���ViBe+��ǰ���ɰ棬0����ʾ��1ֻ��ʾ�ָ��ɰ棬2���������ɰ�Ҳ��ʾ
+# 是否显示和保存ViBe+法前景蒙版，0不显示，1只显示分割蒙版，2包括更新蒙版也显示
 SHOWED_VIBE=1
 SAVE_VIBE=1
 
-# �Ƿ���ʾ�ͱ�����֡��ַ��ɰ棬0����ʾ��1��ʾ
+# 是否显示和保存五帧差分法蒙版，0不显示，1显示
 SHOWED_FFD=0
 SAVE_FFD=1
 
-# �Ƿ���ʾ����֡ͼ��0����ʾ��1��ʾ
+# 是否显示输入帧图像，0不显示，1显示
 SHOWED_INPUT=1
 
-# �Ƿ���ʾ��������ɰ�
+# 是否显示和输出交蒙版
 SHOWED_MERGE=1
 SAVE_MERGE=1
 
-# �Ƿ���ʾ�ͱ�������ǰ���ɰ棬0����ʾ��1��ʾ
+# 是否显示和保存最终前景蒙版，0不显示，1显示
 SHOWED_OUTPUT=1
 SAVE_OUTPUT=1
 
-# �Ƿ���ʾ���ݼ��Ľ���Ա��ɰ棬0����ʾ��1��ʾ
+# 是否显示数据集的结果对比蒙版，0不显示，1显示
 SHOWED_RESULT=0
 
-# ������֡���һ����Ϣ
+# 隔多少帧输出一次信息
 PARTITION=1
 
-# �м���Ϣ������նˣ�0�������1���
+# 中间信息输出到终端，0不输出，1输出
 MSG_PRT=1
 
-# ����Ŀ¼��linux�¿�����"./"����windows��Ҫô����·����ҪôΪ��
-SAVE_FOLDER=D:\test
+# 保存目录，linux下可以用"./"，而windows下要么绝对路径，要么为空
+SAVE_FOLDER=D:\test2
 
-# �м���Ϣ������浽Ŀ¼���ļ���0�������1���
+# 中间信息输出保存到目录下文件，0不输出，1输出
 MSG_SAVE=1
 
-# ���ս��������浽Ŀ¼���ļ���0�������1���
+# 最终结果输出保存到目录下文件，0不输出，1输出
 RES_SAVE=1

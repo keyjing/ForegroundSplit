@@ -1,17 +1,17 @@
-#ifndef CDW_2014_TEST_H
+ï»¿#ifndef CDW_2014_TEST_H
 #define CDW_2014_TEST_H
 
 #include "FrameSet.h"
 #include <string>
 
-/*		CDW-2014Êı¾İ¼¯×Ó¼¯Ä¿Â¼ĞÅÏ¢²ÎÊı		*/
-#define DEFAULT_FOLDER_INPUT	"/input/"			// ÊÓÆµÖ¡Ä¿Â¼
-#define DEFAULT_FOLDER_RESULT	"/groundtruth/"		// ½á¹ûÃÉ°æÄ¿Â¼
-#define DEFAULT_FILE_MESSAGE	"/temporalROI.txt"	// ²ÎÊıĞÅÏ¢£ºÆğÊ¼Ö¡Êı  ×ÜÖ¡Êı
-#define PREFIX_OF_INPUT_FILE	"in"				// ÊäÈëÍ¼Æ¬Ãû³ÆÇ°×º
-#define PREFIX_OF_RESULT_FILE	"gt"				// ½á¹ûÍ¼Æ¬Ãû³ÆÇ°×º
-#define INPUT_IMAGE_TYPE		".jpg"				// ÊäÈëÍ¼Æ¬¸ñÊ½
-#define RESULT_IMAGE_TYPE		".png"				// ¶Ô±ÈÍ¼Æ¬¸ñÊ½
+/*		CDW-2014æ•°æ®é›†å­é›†ç›®å½•ä¿¡æ¯å‚æ•°		*/
+#define DEFAULT_FOLDER_INPUT	"/input/"			// è§†é¢‘å¸§ç›®å½•
+#define DEFAULT_FOLDER_RESULT	"/groundtruth/"		// ç»“æœè’™ç‰ˆç›®å½•
+#define DEFAULT_FILE_MESSAGE	"/temporalROI.txt"	// å‚æ•°ä¿¡æ¯ï¼šèµ·å§‹å¸§æ•°  æ€»å¸§æ•°
+#define PREFIX_OF_INPUT_FILE	"in"				// è¾“å…¥å›¾ç‰‡åç§°å‰ç¼€
+#define PREFIX_OF_RESULT_FILE	"gt"				// ç»“æœå›¾ç‰‡åç§°å‰ç¼€
+#define INPUT_IMAGE_TYPE		".jpg"				// è¾“å…¥å›¾ç‰‡æ ¼å¼
+#define RESULT_IMAGE_TYPE		".png"				// å¯¹æ¯”å›¾ç‰‡æ ¼å¼
 
 
 class CDW_2014_Test : public FrameSet
@@ -19,14 +19,14 @@ class CDW_2014_Test : public FrameSet
 public:
     CDW_2014_Test(const std::string& path);
 
-    // Í¨¹ı FrameSet ¼Ì³Ğ
+    // é€šè¿‡ FrameSet ç»§æ‰¿
     virtual cv::Mat getNextInput(int k = 1) override;
 
-    // Í¨¹ı FrameSet ¼Ì³Ğ
+    // é€šè¿‡ FrameSet ç»§æ‰¿
     virtual cv::Mat getNextResult(int k = 1) override;
 
     void setId(int id);
-    int FromStart(int k = 0);		// ½«Ö¸±ê input_id ºÍ res_id Ö¸Ïò start + k
+    int FromStart(int k = 0);		// å°†æŒ‡æ ‡ input_id å’Œ res_id æŒ‡å‘ start + k
 private:
     int start_id, end_id, input_id, res_id;
 };

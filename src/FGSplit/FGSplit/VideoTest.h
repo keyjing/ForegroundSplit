@@ -1,4 +1,4 @@
-#ifndef VIDEOTEST_H
+﻿#ifndef VIDEOTEST_H
 #define VIDEOTEST_H
 
 #include "FrameSet.h"
