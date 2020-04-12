@@ -157,6 +157,29 @@ int main()
     if (start != end)
     {
         string tmp = path.substr(start, end - start);
+        string command = "mkdir ";
+        if (save_folder.length() != 0)
+        {
+            // linuxÏÂ
+            if (save_folder[0] == '.' || save_folder[0] == '/')
+            {
+                if (save_folder[save_folder.length() - 1] != '/')
+                    save_folder += '/';
+                command += "-p ";
+                
+            }
+            // windowsÏÂ
+            else
+            {
+                for (int i = 0; i < save_folder.length(); ++i)
+                    if (save_folder[i] == '/')
+                        save_folder[i] = '\\';
+                if (save_folder[save_folder.length() - 1] != '\\')
+                    save_folder += '\\';
+            }
+        }
+        command += save_folder + tmp;
+        system(command.c_str());
         s.setFile_name(save_folder + tmp);
     }
 

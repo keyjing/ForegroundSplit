@@ -37,7 +37,7 @@ PARTITION=1
 MSG_PRT=1
 
 # 保存目录，linux下可以用"./"，而windows下要么绝对路径，要么为空
-SAVE_FOLDER=
+SAVE_FOLDER=D:\test
 
 # 中间信息输出保存到目录下文件，0不输出，1输出
 MSG_SAVE=1
