@@ -34,7 +34,7 @@ void Solution::Run()
     ViBePlus vibeplus;
     FiveFrameDiff ffd;
 
-    // ÎåÖ¡²î·Ö·¨Ç°Á½Ö¡²»Êä³ö
+    // äº”å¸§å·®åˆ†æ³•å‰ä¸¤å¸§ä¸è¾“å‡º
     for (int i = 0; i < 2; ++i)
     {
         frame_in = fs.getNextInput();
@@ -42,14 +42,14 @@ void Solution::Run()
             return;
         ffd.Run(frame_in);
     }
-    // µÚ¶şÖ¡ Vibe+½¨Ä£
+    // ç¬¬äºŒå¸§ Vibe+å»ºæ¨¡
     vibeplus.Run(frame_in);
 
-    // ½á¹ûÖ¡Ìø¹ıÇ°Á½Ö¡
+    // ç»“æœå¸§è·³è¿‡å‰ä¸¤å¸§
     fs.getNextResult(2);
     start_id += 2;
 
-    // ±£´æµÚÈı¡¢ËÄÖ¡£¬ÎåÖ¡²î·Ö·¨ĞèÒªÌáÇ°ÖªµÀÏÂÁ½Ö¡
+    // ä¿å­˜ç¬¬ä¸‰ã€å››å¸§ï¼Œäº”å¸§å·®åˆ†æ³•éœ€è¦æå‰çŸ¥é“ä¸‹ä¸¤å¸§
     queue<Mat> inque, resque;
     for (int i = 0; i < 2; ++i)
     {
@@ -61,7 +61,7 @@ void Solution::Run()
         resque.push(frame_res);
     }
 
-    // ³ÌĞòÔËĞĞÊ±¼äÍ³¼Æ±äÁ¿
+    // ç¨‹åºè¿è¡Œæ—¶é—´ç»Ÿè®¡å˜é‡
     double start, time_vibe, time_ffd, time_merge;
     double time_ave_vibe, time_ave_ffd, time_ave_merge;
     time_ave_vibe = time_ave_ffd = time_ave_merge = 0;
@@ -85,13 +85,13 @@ void Solution::Run()
     while (!inque.empty())
     {
         ++cnt;
-        // vibe+½á¹û¡¢ffd½á¹û¡¢×îÖÕ½á¹û¡¢µ±Ç°´¦ÀíÊäÈëÖ¡¡¢µ±Ç°´¦Àí½á¹ûÖ¡
+        // vibe+ç»“æœã€ffdç»“æœã€æœ€ç»ˆç»“æœã€å½“å‰å¤„ç†è¾“å…¥å¸§ã€å½“å‰å¤„ç†ç»“æœå¸§
         Mat vibe_fg, ffd_fg, fg, merge, input, result;
 
         //======  ViBe+ START  =======//
         start = static_cast<double>(getTickCount());
 
-        // ´Ó¶ÓÁĞ»ñÈ¡µ±Ç°´¦ÀíÊäÈëÖ¡¡¢½á¹ûÖ¡
+        // ä»é˜Ÿåˆ—è·å–å½“å‰å¤„ç†è¾“å…¥å¸§ã€ç»“æœå¸§
         inque.front().copyTo(input);
         inque.pop();
         if (input.empty())
@@ -99,16 +99,16 @@ void Solution::Run()
         resque.front().copyTo(result);
         resque.pop();
 
-        // Vibe+´Óµ±Ç°ÊäÈë´¦Àí
+        // Vibe+ä»å½“å‰è¾“å…¥å¤„ç†
         vibe_fg = vibeplus.Run(input);
 
         time_vibe = ((double)getTickCount() - start) / getTickFrequency() * 1000;
         //======  ViBe+ MESSAGE  =======//
-        // ¼ÆËãÆ½¾ÖÖµ
-        time_ave_vibe = (time_ave_vibe * (cnt - 1) + time_vibe) / cnt;
+        // è®¡ç®—å¹³å±€å€¼
+        CalNewAve(time_ave_vibe, time_vibe, cnt);
         if (!result.empty() && ForegroundCompare(vibe_fg, result, Pr_vibe, Re_vibe, F1_vibe))
         {
-            // ¼ÆËãÆ½¾ÖÖµ
+            // è®¡ç®—å¹³å±€å€¼
             CalNewAve(Pr_ave_vibe, Pr_vibe, cnt);
             CalNewAve(Re_ave_vibe, Re_vibe, cnt);
             CalNewAve(F1_ave_vibe, F1_vibe, cnt);
@@ -119,7 +119,7 @@ void Solution::Run()
         //======  ffd START  =======//
         start = static_cast<double>(getTickCount());
 
-        // ffd´ÓºóÁ½Ö¡´¦Àí
+        // ffdä»åä¸¤å¸§å¤„ç†
         frame_in = fs.getNextInput();
         if (!frame_in.empty())
         {
@@ -132,11 +132,11 @@ void Solution::Run()
 
         time_ffd = ((double)getTickCount() - start) / getTickFrequency() * 1000;
         //======  ffd MESSAGE  =======//
-        // ¼ÆËãÆ½¾ÖÖµ
-        time_ave_ffd = (time_ave_ffd * (cnt - 1) + time_vibe) / cnt;
+        // è®¡ç®—å¹³å±€å€¼
+        CalNewAve(time_ave_ffd, time_ffd, cnt);
         if (!result.empty() && ForegroundCompare(ffd_fg, result, Pr_ffd, Re_ffd, F1_ffd))
         {
-            // ¼ÆËãÆ½¾ÖÖµ
+            // è®¡ç®—å¹³å±€å€¼
             CalNewAve(Pr_ave_ffd, Pr_ffd, cnt);
             CalNewAve(Re_ave_ffd, Re_ffd, cnt);
             CalNewAve(F1_ave_ffd, F1_ffd, cnt);
@@ -151,11 +151,11 @@ void Solution::Run()
         time_merge = ((double)getTickCount() - start) / getTickFrequency() * 1000;
         time_merge += time_vibe + time_ffd;
         //======  merge MESSAGE  =======//
-        // ¼ÆËãÆ½¾ÖÖµ
-        time_ave_merge = (time_ave_merge * (cnt - 1) + time_merge) / cnt;
+        // è®¡ç®—å¹³å±€å€¼
+        CalNewAve(time_ave_merge, time_merge, cnt);
         if (!result.empty() && ForegroundCompare(fg, result, Pr_merge, Re_merge, F1_merge))
         {
-            // ¼ÆËãÆ½¾ÖÖµ
+            // è®¡ç®—å¹³å±€å€¼
             CalNewAve(Pr_ave_merge, Pr_merge, cnt);
             CalNewAve(Re_ave_merge, Re_merge, cnt);
             CalNewAve(F1_ave_merge, F1_merge, cnt);
@@ -163,34 +163,34 @@ void Solution::Run()
         //======  merge END =======//
 
         if (showed_input && !input.empty())
-            imshow("ÊäÈë", input);
+            imshow("è¾“å…¥", input);
 
         if (showed_result && !result.empty())
-            imshow("¶Ô±È", result);
+            imshow("å¯¹æ¯”", result);
 
         if (showed_vibe_fg && !vibe_fg.empty())
-            imshow("vibeÇ°¾°ÃÉ°æ", vibe_fg);
+            imshow("vibeå‰æ™¯è’™ç‰ˆ", vibe_fg);
 
         if (showed_vibe_up)
-            imshow("¸üĞÂÃÉ°æ", vibeplus.getUpdateModel());
+            imshow("æ›´æ–°è’™ç‰ˆ", vibeplus.getUpdateModel());
 
         if (showed_ffd_fg && !ffd_fg.empty())
-            imshow("Ö¡²îÇ°¾°ÃÉ°æ", ffd_fg);
+            imshow("å¸§å·®å‰æ™¯è’™ç‰ˆ", ffd_fg);
 
         if (showed_merge && !merge.empty())
-            imshow("½»ÔËËãÃÉ°æ", merge);
+            imshow("äº¤è¿ç®—è’™ç‰ˆ", merge);
 
         if (showed_output && !fg.empty())
-            imshow("×îÖÕÇ°¾°ÃÉ°æ", fg);
+            imshow("æœ€ç»ˆå‰æ™¯è’™ç‰ˆ", fg);
 
         cv::waitKey(25);
 
-        // ¼ÆÊıË¢ĞÂ
+        // è®¡æ•°åˆ·æ–°
         if (--part_cnt > 0)
             continue;
         part_cnt = part;
 
-        // ÏûÏ¢Êä³ö±£´æ
+        // æ¶ˆæ¯è¾“å‡ºä¿å­˜
         stringstream ntos;
         ntos << cnt + start_id;
 
@@ -293,13 +293,13 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge)
 
     merge = Mat::zeros(vibe_fg.size(), CV_8UC1);
 
-    // ÅòÕÍ
+    // è†¨èƒ€
     Mat imgtmp;
 
     Mat ele = getStructuringElement(MORPH_RECT, Size(DILATION_SIZE, DILATION_SIZE));
     dilate(vibe_fg, imgtmp, ele);
 
-    // ÓëÔËËã¡¢ºÏ²¢
+    // ä¸è¿ç®—ã€åˆå¹¶
     for (int i = 0; i < vibe_fg.rows; ++i)
     {
         for (int j = 0; j < vibe_fg.cols; ++j)
@@ -320,7 +320,7 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge)
     }
 
 /*
-    // ºÏ²¢Á½ÖÖÇ°¾°ÃÉ°æ
+    // åˆå¹¶ä¸¤ç§å‰æ™¯è’™ç‰ˆ
     for (int i = 0; i < vibe_fg.rows; ++i)
     {
         for (int j = 0; j < vibe_fg.rows; ++j)
@@ -335,32 +335,32 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg, cv::Mat& merge)
     vector<Vec4i> hierarchy;
     fg.copyTo(imgtmp);
 
-    // ÌáÈ¡ÂÖÀª
+    // æå–è½®å»“
     findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-    // ±éÀúÂÖÀª
+    // éå†è½®å»“
     for (int i = 0; i < contours.size(); ++i)
     {
-        // Ò»¼¶¸¸ÂÖÀª
+        // ä¸€çº§çˆ¶è½®å»“
         int father = hierarchy[i][3];
-        // ¶ş¼¶¸¸ÂÖÀª
+        // äºŒçº§çˆ¶è½®å»“
         int grandpa = -1;
         if (father >= 0)
             grandpa = hierarchy[father][3];
 
 
-        // ÓĞÒ»¼¶¸¸ÂÖÀª¶øÃ»ÓĞ¶ş¼¶¸¸ÂÖÀª£¬ËµÃ÷ÆäÎªÇ°¾°¿×¶´
+        // æœ‰ä¸€çº§çˆ¶è½®å»“è€Œæ²¡æœ‰äºŒçº§çˆ¶è½®å»“ï¼Œè¯´æ˜å…¶ä¸ºå‰æ™¯å­”æ´
         if (father >= 0 && grandpa < 0)
         {
-            // ÂÖÀªÇøÓò´óĞ¡
+            // è½®å»“åŒºåŸŸå¤§å°
             double area = contourArea(contours[i]);
 
-            // ¿×¶´Ãæ»ıĞ¡ÓÚÄ¬ÈÏÖµµÄ½øĞĞÌî³ä
+            // å­”æ´é¢ç§¯å°äºé»˜è®¤å€¼çš„è¿›è¡Œå¡«å……
             if (area <= FILL_MERGE_FG_AREA)
                 drawContours(fg, contours, i, Scalar(255), -1);
         }
 
-        // ÎŞ¸¸ÂÖÀª£¬ËµÃ÷¸ÃÂÖÀªÊÇ×îÍâÎ§ÂÖÀª£¬¼´Ç°¾°°ßµãÇøÓò£¬Ä¨³ı¹ıĞ¡µÄÇ°¾°°ßµã
+        // æ— çˆ¶è½®å»“ï¼Œè¯´æ˜è¯¥è½®å»“æ˜¯æœ€å¤–å›´è½®å»“ï¼Œå³å‰æ™¯æ–‘ç‚¹åŒºåŸŸï¼ŒæŠ¹é™¤è¿‡å°çš„å‰æ™¯æ–‘ç‚¹
         if (father < 0)
         {
             if (contourArea(contours[i]) < DEL_MERGE_FG_AREA)
@@ -457,5 +457,3 @@ void Solution::setShowed_vibe_fg(bool value)
 {
     showed_vibe_fg = value;
 }
-
-
