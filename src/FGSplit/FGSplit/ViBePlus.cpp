@@ -5,7 +5,7 @@
 using namespace std;
 using namespace cv;
 
-// Ê¹ÓÃÄ¬ÈÏ²ÎÊı
+// ä½¿ç”¨é»˜è®¤å‚æ•°
 ViBePlus::ViBePlus(int num_samples, int min_match, int radius, int rand_sam)
 {
     this->num_samples = num_samples;
@@ -14,9 +14,11 @@ ViBePlus::ViBePlus(int num_samples, int min_match, int radius, int rand_sam)
     this->rand_sam = rand_sam;
 }
 
-// ÊÍ·ÅÄÚ´æ
+// é‡Šæ”¾å†…å­˜
 ViBePlus::~ViBePlus(void)
 {
+    if(samples_rgb == nullptr)
+        return;
     delete samples_rgb;
     delete samples_gray;
     delete samples_ave;
@@ -28,7 +30,7 @@ ViBePlus::~ViBePlus(void)
     delete samples_maxInnerGrad;
 }
 
-// ÊäÈëÊÓÆµÖ¡£¬Ö´ĞĞVibe+Ëã·¨Êä³öÇ°¾°ÃÉ°æ£¬²¢¸üĞÂ±³¾°Ä£ĞÍ
+// è¾“å…¥è§†é¢‘å¸§ï¼Œæ‰§è¡ŒVibe+ç®—æ³•è¾“å‡ºå‰æ™¯è’™ç‰ˆï¼Œå¹¶æ›´æ–°èƒŒæ™¯æ¨¡å‹
 Mat ViBePlus::Run(Mat img)
 {
     if (img.empty())
@@ -36,27 +38,27 @@ Mat ViBePlus::Run(Mat img)
         cout << "ERROR Run: The image is empty." << endl;
         return Mat();
     }
-    // ·Ö¸ñÊ½´æ´¢Í¼Ïñ
+    // åˆ†æ ¼å¼å­˜å‚¨å›¾åƒ
     FrameCapture(img);
-    // ÈôÑù±¾¿â¶¼Îª¿Õ£¬±íÊ¾Î´³õÊ¼»¯£¬½øĞĞ³õÊ¼»¯
+    // è‹¥æ ·æœ¬åº“éƒ½ä¸ºç©ºï¼Œè¡¨ç¤ºæœªåˆå§‹åŒ–ï¼Œè¿›è¡Œåˆå§‹åŒ–
     if (!samples_rgb && !samples_gray)
     {
-        // ·ÖÅäÄÚ´æ
+        // åˆ†é…å†…å­˜
         InitMemory();
-        // ³õÊ¼»¯Ä£ĞÍ
+        // åˆå§‹åŒ–æ¨¡å‹
         InitModel();
         return Mat();
     }
-    // ÌáÈ¡·Ö¸îÃÉ°æ
+    // æå–åˆ†å‰²è’™ç‰ˆ
     ExtractBG();
 
-    // ÓÉ·Ö¸îÃÉ°æ¼ÆËã¸üĞÂÃÉ°æ
+    // ç”±åˆ†å‰²è’™ç‰ˆè®¡ç®—æ›´æ–°è’™ç‰ˆ
     CalUpdateModel();
 
-    // ¸ù¾İ¸üĞÂÃÉ°æ¸üĞÂ±³¾°Ä£ĞÍ
+    // æ ¹æ®æ›´æ–°è’™ç‰ˆæ›´æ–°èƒŒæ™¯æ¨¡å‹
     UpdateModel();
 
-    // ·µ»Ø·Ö¸îÃÉ°æ
+    // è¿”å›åˆ†å‰²è’™ç‰ˆ
     return segModel;
 }
 
@@ -70,7 +72,7 @@ cv::Mat ViBePlus::getUpdateModel()
     return updateModel;
 }
 
-// ·ÖRGBºÍ»Ò¶È¸ñÊ½´æ´¢Í¼Ïñ
+// åˆ†RGBå’Œç°åº¦æ ¼å¼å­˜å‚¨å›¾åƒ
 void ViBePlus::FrameCapture(cv::Mat img)
 {
     img.copyTo(frame_rgb);
@@ -86,21 +88,21 @@ void ViBePlus::FrameCapture(cv::Mat img)
     }
 }
 
-// ·ÖÅäÄÚ´æ
+// åˆ†é…å†…å­˜
 void ViBePlus::InitMemory()
 {
     segModel = Mat::zeros(frame_gray.size(), CV_8UC1);
     updateModel = Mat::zeros(frame_gray.size(), CV_8UC1);
 
-    // ÎªÑù±¾¿â·ÖÅäÄÚ´æ
-    samples_rgb = new unsigned char*** [frame_gray.rows];	// RGBÑù±¾¿â
-    samples_gray = new unsigned char** [frame_gray.rows];	// »Ò¶ÈÑù±¾¿â
+    // ä¸ºæ ·æœ¬åº“åˆ†é…å†…å­˜
+    samples_rgb = new unsigned char*** [frame_gray.rows];	// RGBæ ·æœ¬åº“
+    samples_gray = new unsigned char** [frame_gray.rows];	// ç°åº¦æ ·æœ¬åº“
 
-    // ÎªÑù±¾¼¯¾ùÖµ¡¢·½²î·ÖÅäÄÚ´æ
+    // ä¸ºæ ·æœ¬é›†å‡å€¼ã€æ–¹å·®åˆ†é…å†…å­˜
     samples_ave = new double* [frame_gray.rows];
     samples_sumSqr = new double* [frame_gray.rows];
 
-    // Îª¸üĞÂÄ£ĞÍÏà¹ØĞÅÏ¢·ÖÅäÄÚ´æ
+    // ä¸ºæ›´æ–°æ¨¡å‹ç›¸å…³ä¿¡æ¯åˆ†é…å†…å­˜
     samples_fgCnt = new int* [frame_gray.rows];
     samples_bgInner = new bool* [frame_gray.rows];
     samples_innerState = new int* [frame_gray.rows];
@@ -140,44 +142,44 @@ void ViBePlus::InitMemory()
     }
 }
 
-// ³õÊ¼»¯±³¾°Ä£ĞÍ
+// åˆå§‹åŒ–èƒŒæ™¯æ¨¡å‹
 void ViBePlus::InitModel()
 {
-    RNG rng;	// RNG£ºOpenCVÖĞµÄC++°æ±¾Ëæ»úÊı
+    RNG rng;	// RNGï¼šOpenCVä¸­çš„C++ç‰ˆæœ¬éšæœºæ•°
     int row, col;
-    // ÎªÃ¿¸öÏñËØµã½¨Á¢Ñù±¾¿â
+    // ä¸ºæ¯ä¸ªåƒç´ ç‚¹å»ºç«‹æ ·æœ¬åº“
     for (int i = 0; i < frame_gray.rows; ++i)
     {
         for (int j = 0; j < frame_gray.cols; ++j)
         {
-            // Ã¿¸öÏñËØµãÓĞnum_samples¸öÑù±¾µã
+            // æ¯ä¸ªåƒç´ ç‚¹æœ‰num_samplesä¸ªæ ·æœ¬ç‚¹
             for (int k = 0; k < num_samples; ++k)
             {
-                // 8ÁÚÓòÖĞËæ»úÑ¡Ôñ
+                // 8é‚»åŸŸä¸­éšæœºé€‰æ‹©
                 int random;
-                random = rng.uniform(0, 9);		// ¾ùÔÈ·Ö²¼
+                random = rng.uniform(0, 9);		// å‡åŒ€åˆ†å¸ƒ
                 row = i + c_xoff[random];
                 random = rng.uniform(0, 9);
                 col = j + c_yoff[random];
 
-                // ·ÀÖ¹ÏñËØµãÔ½½ç
+                // é˜²æ­¢åƒç´ ç‚¹è¶Šç•Œ
                 if (row < 0) row = 0;
                 if (row >= frame_gray.rows) row = frame_gray.rows - 1;
                 if (col < 0) col = 0;
                 if (col >= frame_gray.cols) col = frame_gray.cols - 1;
 
-                // ±£´æµ½»Ò¶È¡¢RGBÑù±¾¿â
+                // ä¿å­˜åˆ°ç°åº¦ã€RGBæ ·æœ¬åº“
                 samples_gray[i][j][k] = frame_gray.at<uchar>(row, col);
                 for (int m = 0; m < 3; ++m)
                     samples_rgb[i][j][k][m] = frame_rgb.at<Vec3b>(row, col)[m];
 
-                // ÀÛ¼Óµ½Ñù±¾¾ùÖµ
+                // ç´¯åŠ åˆ°æ ·æœ¬å‡å€¼
                 samples_ave[i][j] += samples_gray[i][j][k];
             }
-            // ¼ÆËã¾ùÖµ
+            // è®¡ç®—å‡å€¼
             samples_ave[i][j] /= num_samples;
 
-            // ¼ÆËã·½²î
+            // è®¡ç®—æ–¹å·®
             for (int k = 0; k < num_samples; ++k)
                 samples_sumSqr[i][j] += pow(samples_gray[i][j][k] - samples_ave[i][j], 2);
             samples_sumSqr[i][j] /= num_samples;
@@ -185,7 +187,7 @@ void ViBePlus::InitModel()
     }
 }
 
-// ÌáÈ¡·Ö¸îÃÉ°æ
+// æå–åˆ†å‰²è’™ç‰ˆ
 void ViBePlus::ExtractBG()
 {
     RNG rng;
@@ -193,22 +195,22 @@ void ViBePlus::ExtractBG()
     {
         for (int j = 0; j < frame_gray.cols; ++j)
         {
-            //====  ¼ÆËã×ÔÊÊÓ¦ãĞÖµ  ====//
-            // ¾àÀëµÄ×ÔÊÊÓ¦ãĞÖµ
+            //====  è®¡ç®—è‡ªé€‚åº”é˜ˆå€¼  ====//
+            // è·ç¦»çš„è‡ªé€‚åº”é˜ˆå€¼
             double adaThreshold = DEFAULT_THRESHOLD_MIN;
-            // ¸ù¾İ·½²î¼ÆËã±ê×¼²î
+            // æ ¹æ®æ–¹å·®è®¡ç®—æ ‡å‡†å·®
             double sigma = sqrt(samples_sumSqr[i][j]);
-            // µÃµ½¾àÀëµÄ×ÔÊÊÓ¦ãĞÖµ
+            // å¾—åˆ°è·ç¦»çš„è‡ªé€‚åº”é˜ˆå€¼
             adaThreshold = sigma * AMP_MULTIFACTOR;
 
-            // µ÷Õû×ÔÊÊÓ¦ãĞÖµ·¶Î§
+            // è°ƒæ•´è‡ªé€‚åº”é˜ˆå€¼èŒƒå›´
             if (adaThreshold < DEFAULT_THRESHOLD_MIN)
                 adaThreshold = DEFAULT_THRESHOLD_MIN;
             if (adaThreshold > DEFAULT_THRESHOLD_MAX)
                 adaThreshold = DEFAULT_THRESHOLD_MAX;
 
-            //====  ¼ÆËãÑÕÉ«»û±äºÍÆ¥ÅäÇé¿ö  ====//
-            // µ±Ç°Ö¡ÔÚ(i, j)µãµÄRGBÍ¨µÀÖµ
+            //====  è®¡ç®—é¢œè‰²ç•¸å˜å’ŒåŒ¹é…æƒ…å†µ  ====//
+            // å½“å‰å¸§åœ¨(i, j)ç‚¹çš„RGBé€šé“å€¼
             int B = frame_rgb.at<Vec3b>(i, j)[0];
             int G = frame_rgb.at<Vec3b>(i, j)[1];
             int R = frame_rgb.at<Vec3b>(i, j)[2];
@@ -216,17 +218,17 @@ void ViBePlus::ExtractBG()
             int k = 0, matches = 0;
             for (; matches < min_match && k < num_samples; ++k)
             {
-                // Èôµ±Ç°ÖµÓëÑù±¾ÖµÖ®²î²»Ğ¡ÓÚ×ÔÊÊÓ¦ãĞÖµ£¬²»Âú×ãÆ¥ÅäÌõ¼ş
+                // è‹¥å½“å‰å€¼ä¸æ ·æœ¬å€¼ä¹‹å·®ä¸å°äºè‡ªé€‚åº”é˜ˆå€¼ï¼Œä¸æ»¡è¶³åŒ¹é…æ¡ä»¶
                 int dist = abs(samples_gray[i][j][k] - frame_gray.at<uchar>(i, j));
                 if (dist >= adaThreshold)
                     continue;
 
-                // µ±Ç°Ö¡ÔÚ(i, j)µãµÄµÚk¸öÑù±¾µãµÄRGBÍ¨µÀÖµ
+                // å½“å‰å¸§åœ¨(i, j)ç‚¹çš„ç¬¬kä¸ªæ ·æœ¬ç‚¹çš„RGBé€šé“å€¼
                 int B_sam = samples_rgb[i][j][k][0];
                 int G_sam = samples_rgb[i][j][k][1];
                 int R_sam = samples_rgb[i][j][k][2];
 
-                // ÑÕÉ«»û±ä
+                // é¢œè‰²ç•¸å˜
                 //double colorDist, RGB_Norm2, RGBSam_Norm2, RGB_Vev, p2;
                 double RGB_Norm2 = pow(B, 2) + pow(G, 2) + pow(R, 2);
                 double RGBSam_Norm2 = pow(B_sam, 2) + pow(G_sam, 2) + pow(R_sam, 2);
@@ -234,31 +236,31 @@ void ViBePlus::ExtractBG()
                 double p2 = RGB_Vec / RGBSam_Norm2;
                 double colordist = (RGB_Norm2 > p2) ? sqrt(RGB_Norm2 - p2) : 0;
 
-                // Èôµ±Ç°ÖµÓëÑù±¾ÖµÖ®²îĞ¡ÓÚ×ÔÊÊÓ¦ãĞÖµ£¬ÇÒÑÕÉ«»û±äĞ¡ÓÚãĞÖµ£¬Âú×ãÆ¥ÅäÌõ¼ş
+                // è‹¥å½“å‰å€¼ä¸æ ·æœ¬å€¼ä¹‹å·®å°äºè‡ªé€‚åº”é˜ˆå€¼ï¼Œä¸”é¢œè‰²ç•¸å˜å°äºé˜ˆå€¼ï¼Œæ»¡è¶³åŒ¹é…æ¡ä»¶
                 if (colordist < DEFAULT_COLOR_THRESHOLD)
                     ++matches;
             }
-            // Æ¥Åä´ÎÊı³¬¹ı#minÖ¸ÊıÎª±³¾°µã£¬·ñÔòÎªÇ°¾°µã
+            // åŒ¹é…æ¬¡æ•°è¶…è¿‡#minæŒ‡æ•°ä¸ºèƒŒæ™¯ç‚¹ï¼Œå¦åˆ™ä¸ºå‰æ™¯ç‚¹
             if (matches >= min_match)
             {
-                // µ±Ç°µãÎª±³¾°µã£¬ÖØÖÃÇ°¾°Í³¼ÆÊı
+                // å½“å‰ç‚¹ä¸ºèƒŒæ™¯ç‚¹ï¼Œé‡ç½®å‰æ™¯ç»Ÿè®¡æ•°
                 samples_fgCnt[i][j] = 0;
 
-                // ÔÚ·Ö¸îÃÉ°æÖĞ±ê¼ÇÎª±³¾°µã
+                // åœ¨åˆ†å‰²è’™ç‰ˆä¸­æ ‡è®°ä¸ºèƒŒæ™¯ç‚¹
                 segModel.at<uchar>(i, j) = 0;
             }
             else
             {
-                // µ±Ç°µãÎªÇ°¾°µã£¬Ç°¾°Í³¼ÆÊı¼ÓÒ»
+                // å½“å‰ç‚¹ä¸ºå‰æ™¯ç‚¹ï¼Œå‰æ™¯ç»Ÿè®¡æ•°åŠ ä¸€
                 samples_fgCnt[i][j]++;
 
-                // ÔÚ·Ö¸îÃÉ°æÖĞ±ê¼ÇÎªÇ°¾°µã
+                // åœ¨åˆ†å‰²è’™ç‰ˆä¸­æ ‡è®°ä¸ºå‰æ™¯ç‚¹
                 segModel.at<uchar>(i, j) = 255;
 
-                // Á¬ĞøÇ°¾°´ÎÊı³¬¹ıÉÏÏŞÖµÊ±£¬¸ÃµãÓ¦¸Ã±»ÈÏÎªÊÇ±³¾°µã
+                // è¿ç»­å‰æ™¯æ¬¡æ•°è¶…è¿‡ä¸Šé™å€¼æ—¶ï¼Œè¯¥ç‚¹åº”è¯¥è¢«è®¤ä¸ºæ˜¯èƒŒæ™¯ç‚¹
                 if (samples_fgCnt[i][j] > DEFAULT_FG_COUNT)
                 {
-                    // Ëæ»úÑ¡Ôñ¸ÃµãÑù±¾¿âµÄÒ»¸öÎ»ÖÃ±£´æµ±Ç°µã
+                    // éšæœºé€‰æ‹©è¯¥ç‚¹æ ·æœ¬åº“çš„ä¸€ä¸ªä½ç½®ä¿å­˜å½“å‰ç‚¹
                     int random = rng.uniform(0, num_samples);
                     samples_gray[i][j][random] = frame_gray.at<uchar>(i, j);
                     for (int m = 0; m < 3; ++m)
@@ -269,7 +271,7 @@ void ViBePlus::ExtractBG()
     }
 }
 
-// ÓÉ·Ö¸îÃÉ°æ¼ÆËã¸üĞÂÃÉ°æ
+// ç”±åˆ†å‰²è’™ç‰ˆè®¡ç®—æ›´æ–°è’™ç‰ˆ
 void ViBePlus::CalUpdateModel()
 {
     Mat img, imgtmp;
@@ -281,36 +283,36 @@ void ViBePlus::CalUpdateModel()
     segModel.copyTo(img);
     updateModel.copyTo(imgtmp);
 
-    // ÌáÈ¡ÂÖÀª
+    // æå–è½®å»“
     findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-    // ±éÀúÂÖÀª
+    // éå†è½®å»“
     for (int i = 0; i < contours.size(); ++i)
     {
-        // Ò»¼¶¸¸ÂÖÀª
+        // ä¸€çº§çˆ¶è½®å»“
         int father = hierarchy[i][3];
-        // ¶ş¼¶¸¸ÂÖÀª
+        // äºŒçº§çˆ¶è½®å»“
         int grandpa = -1;
         if (father >= 0)
             grandpa = hierarchy[father][3];
 
 
-        // ÓĞÒ»¼¶¸¸ÂÖÀª¶øÃ»ÓĞ¶ş¼¶¸¸ÂÖÀª£¬ËµÃ÷ÆäÎªÇ°¾°¿×¶´
+        // æœ‰ä¸€çº§çˆ¶è½®å»“è€Œæ²¡æœ‰äºŒçº§çˆ¶è½®å»“ï¼Œè¯´æ˜å…¶ä¸ºå‰æ™¯å­”æ´
         if (father >= 0 && grandpa < 0)
         {
-            // ÂÖÀªÇøÓò´óĞ¡
+            // è½®å»“åŒºåŸŸå¤§å°
             double area = contourArea(contours[i]);
 
-            // ¶Ô¸üĞÂÃÉ°æÖĞ¿×¶´Ãæ»ıĞ¡ÓÚÄ¬ÈÏÖµµÄ½øĞĞÌî³ä
+            // å¯¹æ›´æ–°è’™ç‰ˆä¸­å­”æ´é¢ç§¯å°äºé»˜è®¤å€¼çš„è¿›è¡Œå¡«å……
             if (area <= FILL_UP_AREA_SIZE)
                 drawContours(updateModel, contours, i, Scalar(255), -1);
 
-            // ¶Ô·Ö¸îÃÉ°æÖĞ¿×¶´Ãæ»ıĞ¡ÓÚÄ¬ÈÏÖµµÄ½øĞĞÌî³ä
+            // å¯¹åˆ†å‰²è’™ç‰ˆä¸­å­”æ´é¢ç§¯å°äºé»˜è®¤å€¼çš„è¿›è¡Œå¡«å……
             if (area <= FILL_SEG_AREA_SIZE)
                 drawContours(segModel, contours, i, Scalar(255), -1);
         }
 
-        // ÎŞ¸¸ÂÖÀª£¬ËµÃ÷¸ÃÂÖÀªÊÇ×îÍâÎ§ÂÖÀª£¬¼´Ç°¾°°ßµãÇøÓò£¬Ä¨³ı¹ıĞ¡µÄÇ°¾°°ßµã
+        // æ— çˆ¶è½®å»“ï¼Œè¯´æ˜è¯¥è½®å»“æ˜¯æœ€å¤–å›´è½®å»“ï¼Œå³å‰æ™¯æ–‘ç‚¹åŒºåŸŸï¼ŒæŠ¹é™¤è¿‡å°çš„å‰æ™¯æ–‘ç‚¹
         if (father < 0)
         {
             if (contourArea(contours[i]) < DEL_SEG_AREA_SIZE)
@@ -318,45 +320,45 @@ void ViBePlus::CalUpdateModel()
         }
     }
 
-    // ±éÀúÓµÓĞÍêÕû8ÁÚÓòµÄÄÚ²¿ÏñËØµã
+    // éå†æ‹¥æœ‰å®Œæ•´8é‚»åŸŸçš„å†…éƒ¨åƒç´ ç‚¹
     for (int i = 1; i < frame_gray.rows - 1; ++i)
     {
         for (int j = 1; j < frame_gray.cols - 1; ++j)
         {
-            // ÁÚÓò×Ü×´Ì¬Î»
+            // é‚»åŸŸæ€»çŠ¶æ€ä½
             int state = 0;
             int maxGrad = 0;
 
-            // ²éÕÒ±³¾°ÄÚ±ßÔµ
+            // æŸ¥æ‰¾èƒŒæ™¯å†…è¾¹ç¼˜
             if (img.at<uchar>(i, j) == 0)
             {
-                // ¶¨Òå8ÁÚÓò·¶Î§
+                // å®šä¹‰8é‚»åŸŸèŒƒå›´
                 int i_min = i - 1;
                 int i_max = i + 1;
                 int j_min = j - 1;
                 int j_max = j + 1;
 
-                // ¼ÆËã8ÁÚÓò×´Ì¬¡¢ÁÚÓò»Ò¶È×î´óÌİ¶È
+                // è®¡ç®—8é‚»åŸŸçŠ¶æ€ã€é‚»åŸŸç°åº¦æœ€å¤§æ¢¯åº¦
                 for (int x = i_min; x < i_max; ++x)
                 {
                     for (int y = j_max; y < j_max; ++y)
                     {
-                        // ÅÅ³ıµ±Ç°µã
+                        // æ’é™¤å½“å‰ç‚¹
                         if (x == i && y == j)
                             continue;
 
-                        // ÁÚÓòµãÊÇ·ñÎªÇ°¾°µã
+                        // é‚»åŸŸç‚¹æ˜¯å¦ä¸ºå‰æ™¯ç‚¹
                         int bitstate = (img.at<uchar>(x, y) == 255) ? 1 : 0;
                         state = (state << 1) + bitstate;
 
-                        // ¼ÆËã×î´óÌİ¶È
+                        // è®¡ç®—æœ€å¤§æ¢¯åº¦
                         maxGrad = max(abs(frame_gray.at<uchar>(i, j) - frame_gray.at<uchar>(x, y)), maxGrad);
                     }
                 }
-                // µ±Ç°×´Ì¬Î»ÏŞ¶¨ÔÚ8bitÄÚ
+                // å½“å‰çŠ¶æ€ä½é™å®šåœ¨8bitå†…
                 state = state & 255;
 
-                // ×´Ì¬Î»´óÓÚ0£¬ÔòËµÃ÷8ÁÚÓòÄÚÓĞÇ°¾°µã£¬¼´µ±Ç°µãÎª±³¾°ÄÚ±ßÔµ
+                // çŠ¶æ€ä½å¤§äº0ï¼Œåˆ™è¯´æ˜8é‚»åŸŸå†…æœ‰å‰æ™¯ç‚¹ï¼Œå³å½“å‰ç‚¹ä¸ºèƒŒæ™¯å†…è¾¹ç¼˜
                 samples_bgInner[i][j] = (state > 0);
             }
             else
@@ -365,37 +367,37 @@ void ViBePlus::CalUpdateModel()
                 samples_innerState[i][j] = 0;
             }
 
-            // ¼ÆËãÉÁË¸µÈ¼¶
+            // è®¡ç®—é—ªçƒç­‰çº§
             if (samples_bgInner[i][j])
             {
-                // µ±Ç°µã8ÁÚÓò×´Ì¬ÓëÉÏÒ»Ö¡ÏàÍ¬£¬ËµÃ÷µ±Ç°µã²»ÉÁË¸£¬ÉÁË¸µÈ¼¶¼õÉÙ
+                // å½“å‰ç‚¹8é‚»åŸŸçŠ¶æ€ä¸ä¸Šä¸€å¸§ç›¸åŒï¼Œè¯´æ˜å½“å‰ç‚¹ä¸é—ªçƒï¼Œé—ªçƒç­‰çº§å‡å°‘
                 if (state == samples_innerState[i][j])
                     samples_bLinkLevel[i][j] = max(samples_bLinkLevel[i][j] - MINUS_BLINK_LEVEL, 0);
                 else
                 {
-                    // µ±Ç°µãÉÁË¸£¬ÉÁË¸µÈ¼¶Ôö¼Ó
+                    // å½“å‰ç‚¹é—ªçƒï¼Œé—ªçƒç­‰çº§å¢åŠ 
                     samples_bLinkLevel[i][j] += ADD_BLINK_LEVEL;
                     samples_bLinkLevel[i][j] = min(samples_bLinkLevel[i][j], MAX_BLINK_LEVEL);
                 }
             }
             else
             {
-                // ·Ç±³¾°ÄÚ±ßÔµÉÁË¸µÈ¼¶¼õÉÙ
+                // éèƒŒæ™¯å†…è¾¹ç¼˜é—ªçƒç­‰çº§å‡å°‘
                 samples_bLinkLevel[i][j] = max(samples_bLinkLevel[i][j] - MINUS_BLINK_LEVEL, 0);
             }
 
-            // ¸üĞÂ×´Ì¬Î»¡¢×î´óÌİ¶È
+            // æ›´æ–°çŠ¶æ€ä½ã€æœ€å¤§æ¢¯åº¦
             samples_bLinkLevel[i][j] = state;
             samples_maxInnerGrad[i][j] = maxGrad;
 
-            // ÉÁË¸µÈ¼¶³¬¹ıãĞÖµÊ±£¬´Ó¸üĞÂÃÉ°æÖĞÒÆ³ı
+            // é—ªçƒç­‰çº§è¶…è¿‡é˜ˆå€¼æ—¶ï¼Œä»æ›´æ–°è’™ç‰ˆä¸­ç§»é™¤
             if (samples_bLinkLevel[i][j] > TC_BLINK_LEVEL)
                 updateModel.at<uchar>(i, j) = 255;
         }
     }
 }
 
-// ¸ù¾İ¸üĞÂÃÉ°æ¸üĞÂ±³¾°Ä£ĞÍ
+// æ ¹æ®æ›´æ–°è’™ç‰ˆæ›´æ–°èƒŒæ™¯æ¨¡å‹
 void ViBePlus::UpdateModel()
 {
     RNG rng;
@@ -403,81 +405,81 @@ void ViBePlus::UpdateModel()
     {
         for (int j = 0; j < frame_gray.cols; ++j)
         {
-            // Ö»¶Ô±³¾°µã½øĞĞ¸üĞÂ£¬ºöÂÔÇ°¾°µã
+            // åªå¯¹èƒŒæ™¯ç‚¹è¿›è¡Œæ›´æ–°ï¼Œå¿½ç•¥å‰æ™¯ç‚¹
             if (updateModel.at<uchar>(i, j) > 0)
                 continue;
 
-            // ¸üĞÂ¸ÃµãÑù±¾¿â£¬¸ÅÂÊÎª 1/rand_sam
+            // æ›´æ–°è¯¥ç‚¹æ ·æœ¬åº“ï¼Œæ¦‚ç‡ä¸º 1/rand_sam
             int random = rng.uniform(0, rand_sam);
             if (random == 0)
             {
-                // Ëæ»úÑ¡È¡Ñù±¾¿âÖĞµÄÑù±¾µã
+                // éšæœºé€‰å–æ ·æœ¬åº“ä¸­çš„æ ·æœ¬ç‚¹
                 random = rng.uniform(0, num_samples);
 
-                // ¸üĞÂÑù±¾¿â
+                // æ›´æ–°æ ·æœ¬åº“
                 uchar newVal = frame_gray.at<uchar>(i, j);
                 samples_gray[i][j][random] = newVal;
                 for (int m = 0; m < 3; ++m)
                     samples_rgb[i][j][random][m] = frame_rgb.at<Vec3b>(i, j)[m];
 
-                // ¸üĞÂÑù±¾¿â¾ùÖµ¡¢·½²î
+                // æ›´æ–°æ ·æœ¬åº“å‡å€¼ã€æ–¹å·®
                 UpdatePixSampleAveAndSumSqr(i, j);
             }
 
-            // Í¬Ê±¸üĞÂÁÚ¾ÓµãµÄÑù±¾¿â£¬¸ÅÂÊÎª 1/rand_sam
+            // åŒæ—¶æ›´æ–°é‚»å±…ç‚¹çš„æ ·æœ¬åº“ï¼Œæ¦‚ç‡ä¸º 1/rand_sam
             random = rng.uniform(0, rand_sam);
             if (random == 0)
             {
-                // ¸ù¾İµ±Ç°µã×î´óÌİ¶È
+                // æ ¹æ®å½“å‰ç‚¹æœ€å¤§æ¢¯åº¦
                 if (samples_maxInnerGrad[i][j] > MAX_INNER_GRAD)
                     continue;
 
-                // Ëæ»úÑ¡È¡ÁÚ¾Óµã
+                // éšæœºé€‰å–é‚»å±…ç‚¹
                 random = rng.uniform(0, 9);
                 int row = i + c_xoff[random];
                 random = rng.uniform(0, 9);
                 int col = j + c_yoff[random];
 
-                // ·ÀÖ¹ÏñËØµãÔ½½ç
+                // é˜²æ­¢åƒç´ ç‚¹è¶Šç•Œ
                 if (row < 0) row = 0;
                 if (row >= frame_gray.rows) row = frame_gray.rows - 1;
                 if (col < 0) col = 0;
                 if (col >= frame_gray.cols) col = frame_gray.cols - 1;
 
-                // Ëæ»úÑ¡È¡Ñù±¾¿âÖĞµÄÑù±¾µã
+                // éšæœºé€‰å–æ ·æœ¬åº“ä¸­çš„æ ·æœ¬ç‚¹
                 random = rng.uniform(0, num_samples);
 
-                // ¸üĞÂÑù±¾¿â
+                // æ›´æ–°æ ·æœ¬åº“
                 uchar newVal = frame_gray.at<uchar>(i, j);
                 samples_gray[row][col][random] = newVal;
                 for (int m = 0; m < 3; ++m)
                     samples_rgb[row][col][random][m] = frame_rgb.at<Vec3b>(i, j)[m];
 
-                // ¸üĞÂÑù±¾¿â¾ùÖµ¡¢·½²î
+                // æ›´æ–°æ ·æœ¬åº“å‡å€¼ã€æ–¹å·®
                 UpdatePixSampleAveAndSumSqr(row, col);
             }
         }
     }
 }
 
-// ¸üĞÂÑù±¾¿â¾ùÖµ¡¢·½²î
+// æ›´æ–°æ ·æœ¬åº“å‡å€¼ã€æ–¹å·®
 void ViBePlus::UpdatePixSampleAveAndSumSqr(int i, int j)
 {
     double ave = 0, sumSqr = 0;
 
-    // ¼ÆËã¾ùÖµ
+    // è®¡ç®—å‡å€¼
     for (int m = 0; m < num_samples; ++m)
         ave += samples_gray[i][j][m];
     ave /= num_samples;
 
-    // Ğ´Èë¾ùÖµ
+    // å†™å…¥å‡å€¼
     samples_ave[i][j] = ave;
 
-    // ¼ÆËã·½²î
+    // è®¡ç®—æ–¹å·®
     for (int m = 0; m < num_samples; ++m)
         sumSqr += pow(samples_gray[i][j][m] - ave, 2);
     sumSqr /= num_samples;
 
-    // Ğ´Èë·½²î
+    // å†™å…¥æ–¹å·®
     samples_sumSqr[i][j] = sumSqr;
 }
