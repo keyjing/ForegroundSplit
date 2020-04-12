@@ -5,12 +5,12 @@
 #include <fstream>
 #include <string>
 
-// ÅäÖÃÎÄ¼şËùÔÚÂ·¾¶
+// é…ç½®æ–‡ä»¶æ‰€åœ¨è·¯å¾„
 #define CONF_FILE_PATH "../../../fgspconf.txt"
 
 using namespace std;
 
-// ±È½ÏsrcÊ×²¿ÊÇ·ñ°üº¬dist£¬·µ»ØsrcÖĞdistÖ®ºóµÄ×Ö·ûÏÂ±ê
+// æ¯”è¾ƒsrcé¦–éƒ¨æ˜¯å¦åŒ…å«distï¼Œè¿”å›srcä¸­distä¹‹åçš„å­—ç¬¦ä¸‹æ ‡
 int cmpOptStr(const string& src, const string& dist)
 {
     int len1 = src.length();
@@ -36,7 +36,7 @@ int main()
         return 1;
     }
 
-    // ÉèÖÃ²ÎÊı±äÁ¿
+    // è®¾ç½®å‚æ•°å˜é‡
     bool choice = false;
     bool cdw_qk = false;
     string path;
@@ -61,7 +61,7 @@ int main()
     string line;
     int k;
 
-    // ¶ÁÈ¡²ÎÊı
+    // è¯»å–å‚æ•°
     while (getline(conf, line))
     {
         if (line.length() == 0 || line[0] == '#')
@@ -120,7 +120,7 @@ int main()
     }
     conf.close();
 
-    // ¶Ô»ñµÃµÄ²ÎÊı½øĞĞÉèÖÃ
+    // å¯¹è·å¾—çš„å‚æ•°è¿›è¡Œè®¾ç½®
     int id = 0;
     FrameSet* fs;
     if (choice)
@@ -170,7 +170,9 @@ int main()
         string command = "mkdir ";
         if (save_folder.length() != 0)
         {
-            // linuxÏÂ
+            if(save_folder[save_folder.length() - 1] == '\r')
+                save_folder = save_folder.substr(0, save_folder.length() - 1);
+            // linuxä¸‹
             if (save_folder[0] == '.' || save_folder[0] == '/')
             {
                 if (save_folder[save_folder.length() - 1] != '/')
@@ -178,7 +180,7 @@ int main()
                 command += "-p ";
                 
             }
-            // windowsÏÂ
+            // windowsä¸‹
             else
             {
                 for (int i = 0; i < save_folder.length(); ++i)
@@ -195,7 +197,7 @@ int main()
 
     s.setStartId(id);
 
-    // ¿ªÊ¼Ö´ĞĞ
+    // å¼€å§‹æ‰§è¡Œ
     s.Run();
 
     delete fs;
