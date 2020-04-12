@@ -20,7 +20,18 @@ void Solution::Run()
 {
     ofstream msgfile, resfile;
     if (msg_save)
-        msgfile = ofstream(file_name_msg, ios::out);
+    {
+        cout << "To create folder \"" + file_name + "\"" << endl;
+        string command;
+        command = "mkdir " + file_name;
+        system(command.c_str());
+        msgfile = ofstream(file_name + "/msglog.txt", ios::out);
+        if (!msgfile)
+        {
+            cout << "ERROR: Can not create folder \"" + file_name + "\"" << endl;
+            return;
+        }
+    }
 
     Mat frame_in, frame_res;
 
@@ -77,10 +88,6 @@ void Solution::Run()
     int part_cnt = part;
     while (!inque.empty())
     {
-        Pr_vibe = Re_vibe = F1_vibe = 0;
-        Pr_ffd = Re_ffd = F1_ffd = 0;
-        Pr_merge = Re_merge = F1_merge = 0;
-
         ++cnt;
         // vibe+结果、ffd结果、最终结果、当前处理输入帧、当前处理结果帧
         Mat vibe_fg, ffd_fg, fg, input, result;
@@ -162,10 +169,10 @@ void Solution::Run()
         if (showed_input && !input.empty())
             imshow("输入", input);
 
-        if (showed_res_fg && !result.empty())
+        if (showed_result && !result.empty())
             imshow("对比", result);
 
-        if (showed_viBe_fg && !vibe_fg.empty())
+        if (showed_vibe_fg && !vibe_fg.empty())
             imshow("vibe前景蒙版", vibe_fg);
 
         if (showed_vibe_up)
@@ -179,9 +186,27 @@ void Solution::Run()
 
         cv::waitKey(25);
 
+        // 计数刷新
         if (--part_cnt > 0)
             continue;
         part_cnt = part;
+
+        // 消息输出保存
+        stringstream ntos;
+        ntos << cnt + start_id;
+
+        if (save_vibe_fg && !vibe_fg.empty())
+            imwrite(file_name + "/" + ntos.str() + "_vibe_fg.jpg", vibe_fg);
+
+        if (save_vibe_up)
+            imwrite(file_name + "/" + ntos.str() + "_vibe_up.jpg", vibeplus.getUpdateModel());
+
+        if (save_ffd_fg && !ffd_fg.empty())
+            imwrite(file_name + "/" + ntos.str() + "_ffd.jpg", ffd_fg);
+
+        if (save_output && !fg.empty())
+            imwrite(file_name + "/" + ntos.str() + "_output.jpg", fg);
+
 
         stringstream ss;
         ss << "======================================================\n";
@@ -248,7 +273,7 @@ void Solution::Run()
     if (res_save)
     {
         if (res_save)
-            resfile = ofstream(file_name_res, ios::out);
+            resfile = ofstream(file_name + "/result.txt", ios::app);
         resfile << ss.str();
         resfile.close();
     }
@@ -264,6 +289,22 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
     Mat fg;
     vibe_fg.copyTo(fg);
 
+    // 膨胀
+    Mat imgtmp;
+    Mat ele = getStructuringElement(MORPH_RECT, Size(DILATION_SIZE, DILATION_SIZE));
+    dilate(vibe_fg, imgtmp, ele);
+
+    // 与运算、合并
+    for (int i = 0; i < vibe_fg.rows; ++i)
+    {
+        for (int j = 0; j < vibe_fg.cols; ++j)
+        {
+            if (imgtmp.at<uchar>(i, j) == 255 && ffd_fg.at<uchar>(i, j) == 255)
+                fg.at<uchar>(i, j) = 255;
+        }
+    }
+
+/*
     // 合并两种前景蒙版
     for (int i = 0; i < vibe_fg.rows; ++i)
     {
@@ -311,23 +352,13 @@ cv::Mat Solution::MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg)
                 drawContours(fg, contours, i, Scalar(0), -1);
         }
     }
-
+*/
     return fg;
 }
 
-void Solution::setShowed_vibe_up(bool value)
+void Solution::setFile_name(const std::string& value)
 {
-    showed_vibe_up = value;
-}
-
-void Solution::setFile_name_res(const std::string& value)
-{
-    file_name_res = value;
-}
-
-void Solution::setFile_name_msg(const std::string& value)
-{
-    file_name_msg = value;
+    file_name = value;
 }
 
 void Solution::setRes_save(bool value)
@@ -352,9 +383,14 @@ void Solution::setPart(int value)
         part = 1;
 }
 
-void Solution::setShowed_res_fg(bool value)
+void Solution::setShowed_result(bool value)
 {
-    showed_res_fg = value;
+    showed_result = value;
+}
+
+void Solution::setSave_output(bool value)
+{
+    save_output = value;
 }
 
 void Solution::setShowed_output(bool value)
@@ -367,12 +403,34 @@ void Solution::setShowed_input(bool value)
     showed_input = value;
 }
 
+void Solution::setSave_ffd_fg(bool value)
+{
+    save_ffd_fg = value;
+}
+
 void Solution::setShowed_ffd_fg(bool value)
 {
     showed_ffd_fg = value;
 }
 
-void Solution::setShowed_viBe_fg(bool value)
+void Solution::setSave_vibe_up(bool value)
 {
-    showed_viBe_fg = value;
+    save_vibe_up = value;
 }
+
+void Solution::setShowed_vibe_up(bool value)
+{
+    showed_vibe_up = value;
+}
+
+void Solution::setSave_vibe_fg(bool value)
+{
+    save_vibe_fg = value;
+}
+
+void Solution::setShowed_vibe_fg(bool value)
+{
+    showed_vibe_fg = value;
+}
+
+

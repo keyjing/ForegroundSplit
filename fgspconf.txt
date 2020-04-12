@@ -5,24 +5,27 @@
 CHOICE_CDW=1
 
 # PATH: 读取文件的位置，相对路径或绝对路径
-# 视频文件如"../../../data/video/Camera Road 01.avi"
-# CDW-2014数据子集如"../../../data/CDW-2014/dataset/baseline/office"
+# 视频文件如"../data/videos/Camera Road 01.avi"
+# CDW-2014数据子集如"../data/CDW-2014/dataset/baseline/office"
 PATH=../../../data/CDW-2014/dataset/baseline/office
 
 # CDW_2014数据集是否从有结果对比蒙版开始，0不是，1是
 CDW_QK=1
 
-# 是否显示ViBe+法前景蒙版，0不显示，1只显示分割蒙版，2包括更新蒙版也显示
+# 是否显示和保存ViBe+法前景蒙版，0不显示，1只显示分割蒙版，2包括更新蒙版也显示
 SHOWED_VIBE=0
+SAVE_VIBE=1
 
-# 是否显示五帧差分法蒙版，0不显示，1显示
+# 是否显示和保存五帧差分法蒙版，0不显示，1显示
 SHOWED_FFD=0
+SAVE_FFD=1
 
 # 是否显示输入帧图像，0不显示，1显示
 SHOWED_INPUT=1
 
-# 是否显示最终前景蒙版，0不显示，1显示
+# 是否显示和保存最终前景蒙版，0不显示，1显示
 SHOWED_OUTPUT=1
+SAVE_OUTPUT=1
 
 # 是否显示数据集的结果对比蒙版，0不显示，1显示
 SHOWED_RESULT=0
@@ -33,8 +36,11 @@ PARTITION=1
 # 中间信息输出到终端，0不输出，1输出
 MSG_PRT=1
 
-# 中间信息输出保存到当前目录下文件，0不输出，1输出
+# 保存目录，linux下可以用"./"，而windows下要么绝对路径，要么为空
+SAVE_FOLDER=
+
+# 中间信息输出保存到目录下文件，0不输出，1输出
 MSG_SAVE=1
 
-# 最终结果输出保存到当前目录下文件，0不输出，1输出
+# 最终结果输出保存到目录下文件，0不输出，1输出
 RES_SAVE=1

@@ -5,15 +5,17 @@
 #include <fstream>
 #include <string>
 
+// 配置文件所在路径
 #define CONF_FILE_PATH "../../../fgspconf.txt"
 
 using namespace std;
 
+// 比较src首部是否包含dist，返回src中dist之后的字符下标
 int cmpOptStr(const string& src, const string& dist)
 {
     int len1 = src.length();
     int len2 = dist.length();
-    if (len1 < len2 + 2)
+    if (len1 < len2 + 1)
         return -1;
     for (int i = 0; i < len2; ++i)
     {
@@ -27,7 +29,6 @@ int cmpOptStr(const string& src, const string& dist)
 
 int main()
 {
-    // 读取配置文件
     ifstream conf(CONF_FILE_PATH, ios::in);
     if (!conf.is_open())
     {
@@ -35,23 +36,30 @@ int main()
         return 1;
     }
 
+    // 设置参数变量
     bool choice = false;
     bool cdw_qk = false;
     string path;
-    bool showed_vide_fg = false;
+    bool showed_vibe_fg = false;
+    bool save_vibe_fg = false;
     bool showed_vibe_up = false;
+    bool save_vibe_up = false;
     bool showed_ffd = false;
+    bool save_ffd = false;
     bool showed_input = false;
     bool showed_output = false;
+    bool save_output = false;
     bool showed_result = false;
     int part = 0;
     bool msg_prt = false;
+    string save_folder = "./";
     bool msg_save = false;
     bool res_save = false;
 
     string line;
     int k;
-    // 获取配置
+
+    // 读取参数
     while (getline(conf, line))
     {
         if (line.length() == 0 || line[0] == '#')
@@ -62,17 +70,26 @@ int main()
             path = line.substr(k, line.length() - k);
         else if ((k = cmpOptStr(line, "CDW_QK")) > 0)
             cdw_qk = (line[k] == '1');
-        else if ((k = cmpOptStr(line, "SHOWED_VIDE")) > 0)
+        else if ((k = cmpOptStr(line, "SHOWED_VIBE")) > 0)
         {
-            showed_vide_fg = (line[k] != '0');
+            showed_vibe_fg = (line[k] != '0');
             showed_vibe_up = (line[k] == '2');
+        }
+        else if ((k = cmpOptStr(line, "SAVE_VIBE")) > 0)
+        {
+            save_vibe_fg = (line[k] != '0');
+            save_vibe_up = (line[k] == '2');
         }
         else if ((k = cmpOptStr(line, "SHOWED_FFD")) > 0)
             showed_ffd = (line[k] == '1');
+        else if ((k = cmpOptStr(line, "SAVE_FFD")) > 0)
+            save_ffd = (line[k] == '1');
         else if ((k = cmpOptStr(line, "SHOWED_INPUT")) > 0)
             showed_input = (line[k] == '1');
         else if ((k = cmpOptStr(line, "SHOWED_OUTPUT")) > 0)
             showed_output = (line[k] == '1');
+        else if ((k = cmpOptStr(line, "SAVE_OUTPUT")) > 0)
+            save_output = (line[k] == '1');
         else if ((k = cmpOptStr(line, "SHOWED_RESULT")) > 0)
             showed_result = (line[k] == '1');
         else if ((k = cmpOptStr(line, "PARTITION")) > 0)
@@ -86,6 +103,8 @@ int main()
         }
         else if ((k = cmpOptStr(line, "MSG_PRT")) > 0)
             msg_prt = (line[k] == '1');
+        else if ((k = cmpOptStr(line, "SAVE_FOLDER")) > 0)
+            save_folder = line.substr(k, line.length() - k);
         else if ((k = cmpOptStr(line, "MSG_SAVE")) > 0)
             msg_save = (line[k] == '1');
         else if ((k = cmpOptStr(line, "RES_SAVE")) > 0)
@@ -93,7 +112,7 @@ int main()
     }
     conf.close();
 
-    // 进行配置
+    // 对获得的参数进行设置
     int id = 0;
     FrameSet* fs;
     if (choice)
@@ -107,12 +126,17 @@ int main()
         fs = new VideoTest(path);
 
     Solution s(*fs);
-    s.setShowed_viBe_fg(showed_vide_fg);
+    s.setStartId(id);
+    s.setShowed_vibe_fg(showed_vibe_fg);
+    s.setSave_vibe_fg(save_vibe_fg);
     s.setShowed_vibe_up(showed_vibe_up);
+    s.setSave_vibe_up(save_vibe_up);
     s.setShowed_ffd_fg(showed_ffd);
+    s.setSave_ffd_fg(save_ffd);
     s.setShowed_input(showed_input);
     s.setShowed_output(showed_output);
-    s.setShowed_res_fg(showed_result);
+    s.setSave_output(save_output);
+    s.setShowed_result(showed_result);
     s.setPart(part);
     s.setMsg_prt(msg_prt);
     s.setMsg_save(msg_save);
@@ -133,10 +157,12 @@ int main()
     if (start != end)
     {
         string tmp = path.substr(start, end - start);
-        s.setFile_name_msg("./" + tmp + "_msg.txt");
-        s.setFile_name_res("./" + tmp + "_msg.txt");
+        s.setFile_name(save_folder + tmp);
     }
+
     s.setStartId(id);
+
+    // 开始执行
     s.Run();
 
     delete fs;

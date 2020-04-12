@@ -216,6 +216,11 @@ void ViBePlus::ExtractBG()
             int k = 0, matches = 0;
             for (; matches < min_match && k < num_samples; ++k)
             {
+                // 若当前值与样本值之差不小于自适应阈值，不满足匹配条件
+                int dist = abs(samples_gray[i][j][k] - frame_gray.at<uchar>(i, j));
+                if (dist >= adaThreshold)
+                    continue;
+
                 // 当前帧在(i, j)点的第k个样本点的RGB通道值
                 int B_sam = samples_rgb[i][j][k][0];
                 int G_sam = samples_rgb[i][j][k][1];
@@ -230,8 +235,7 @@ void ViBePlus::ExtractBG()
                 double colordist = (RGB_Norm2 > p2) ? sqrt(RGB_Norm2 - p2) : 0;
 
                 // 若当前值与样本值之差小于自适应阈值，且颜色畸变小于阈值，满足匹配条件
-                int dist = abs(samples_gray[i][j][k] - frame_gray.at<uchar>(i, j));
-                if (dist < adaThreshold && colordist < DEFAULT_COLOR_THRESHOLD)
+                if (colordist < DEFAULT_COLOR_THRESHOLD)
                     ++matches;
             }
             // 匹配次数超过#min指数为背景点，否则为前景点

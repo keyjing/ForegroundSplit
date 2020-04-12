@@ -12,17 +12,8 @@ cv::Mat FiveFrameDiff::Run(cv::Mat img)
         return Mat();
     }
 
-    Mat frame;
-
-    // 图像灰度化、中值滤波
-    Mat imgtmp;
-    if (img.channels() == 3)
-    {
-        cvtColor(img, imgtmp, CV_BGR2GRAY);
-        medianBlur(imgtmp, frame, MEDIAN_FILTER_SIZE);
-    }
-    else
-        medianBlur(img, frame, MEDIAN_FILTER_SIZE);
+    // 预处理，中值滤波、图像灰度化
+    Mat frame = FirstProcess(img);
 
     // 未满五帧时不进行差分
     if (capacity != 0)
@@ -30,7 +21,7 @@ cv::Mat FiveFrameDiff::Run(cv::Mat img)
         // 保存到序列向量
         frame.copyTo(frame_vec[5 - capacity]);
         // 计算该帧8邻域和
-        CalNeighSum(5 - capacity);
+//        CalNeighSum(5 - capacity);
         // 刚好满五帧可开始
         if (--capacity == 0)
             goto startpos;
@@ -42,7 +33,7 @@ cv::Mat FiveFrameDiff::Run(cv::Mat img)
         int oldest = (id + 5 - 2) % 5;
         frame.copyTo(frame_vec[oldest]);
         // 计算该帧8邻域和
-        CalNeighSum(oldest);
+//        CalNeighSum(oldest);
         id = (id + 1) % 5;
     }
 startpos:
@@ -62,8 +53,8 @@ startpos:
             for (int k = 0; k < 4; ++k)
             {
                 // 小于阈值T2的为背景点
-                if (neighSum[index[k + 1]][i][j] <= FRAME_DIFF_THRESHOLD_2)
-                    continue;
+//                if (neighSum[index[k + 1]][i][j] <= FRAME_DIFF_THRESHOLD_2)
+//                    continue;
                 uchar res = abs(frame_vec[index[k]].at<uchar>(i, j) - frame_vec[index[k + 1]].at<uchar>(i, j));
                 // 大于阈值T1为前景点
                 if (res > FRAME_DIFF_THRESHOLD_1)
@@ -81,9 +72,75 @@ startpos:
         }
     }
 
-    return fgModel;
+    // 后期处理，斑点去除，孔洞填充
+    return FinalProcess(fgModel);
 }
 
+// 预处理，中值滤波、图像灰度化
+Mat FiveFrameDiff::FirstProcess(Mat img)
+{
+    // 中值滤波
+    Mat imgtmp;
+    medianBlur(img, imgtmp, MEDIAN_FILTER_SIZE);
+
+    // 图像灰度化
+    if (img.channels() == 3)
+    {
+        Mat res;
+        cvtColor(imgtmp, res, CV_BGR2GRAY);
+        return res;
+    }
+    else
+        return imgtmp;
+}
+
+// 后期处理，斑点去除，孔洞填充
+Mat FiveFrameDiff::FinalProcess(Mat img)
+{
+    Mat imgtmp, fg;
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    img.copyTo(imgtmp);
+    img.copyTo(fg);
+
+    // 提取轮廓
+    findContours(imgtmp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+
+    // 遍历轮廓
+    for (int i = 0; i < contours.size(); ++i)
+    {
+        // 一级父轮廓
+        int father = hierarchy[i][3];
+        // 二级父轮廓
+        int grandpa = -1;
+        if (father >= 0)
+            grandpa = hierarchy[father][3];
+
+
+        // 有一级父轮廓而没有二级父轮廓，说明其为前景孔洞
+        if (father >= 0 && grandpa < 0)
+        {
+            // 轮廓区域大小
+            double area = contourArea(contours[i]);
+
+            // 孔洞面积小于默认值的进行填充
+            if (area <= FILL_FFD_FG_AREA)
+                drawContours(fg, contours, i, Scalar(255), -1);
+        }
+
+        // 无父轮廓，说明该轮廓是最外围轮廓，即前景斑点区域，抹除过小的前景斑点
+        if (father < 0)
+        {
+            if (contourArea(contours[i]) < DEL_FFD_FG_AREA)
+                drawContours(fg, contours, i, Scalar(0), -1);
+        }
+    }
+    return fg;
+}
+
+
+
+/*
 // 计算该帧8邻域和
 void FiveFrameDiff::CalNeighSum(int k)
 {
@@ -124,3 +181,4 @@ void FiveFrameDiff::CalNeighSum(int k)
         }
     }
 }
+*/

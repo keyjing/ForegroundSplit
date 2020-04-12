@@ -3,6 +3,8 @@
 
 #include "FrameSet.h"
 
+#define DILATION_SIZE           5       // 膨胀大小
+
 #define FILL_MERGE_FG_AREA		20		// 合并后填充的前景空洞大小
 #define	DEL_MERGE_FG_AREA		10		// 合并后抹除的前景斑点大小
 
@@ -16,15 +18,26 @@ public:
 
     void setStartId(int k) { start_id = k; }
 
-    void setShowed_viBe_fg(bool value);
+
+    void setShowed_vibe_fg(bool value);
+
+    void setSave_vibe_fg(bool value);
+
+    void setShowed_vibe_up(bool value);
+
+    void setSave_vibe_up(bool value);
 
     void setShowed_ffd_fg(bool value);
+
+    void setSave_ffd_fg(bool value);
 
     void setShowed_input(bool value);
 
     void setShowed_output(bool value);
 
-    void setShowed_res_fg(bool value);
+    void setSave_output(bool value);
+
+    void setShowed_result(bool value);
 
     void setPart(int value);
 
@@ -34,11 +47,7 @@ public:
 
     void setRes_save(bool value);
 
-    void setFile_name_msg(const std::string& value);
-
-    void setFile_name_res(const std::string& value);
-
-    void setShowed_vibe_up(bool value);
+    void setFile_name(const std::string& value);
 
 private:
     cv::Mat MergeFG(cv::Mat vibe_fg, cv::Mat ffd_fg);		// 合并两种算法结果
@@ -47,12 +56,16 @@ private:
     int cnt;
     int start_id;
 
-    bool showed_viBe_fg = false;
+    bool showed_vibe_fg = false;
+    bool save_vibe_fg = false;
     bool showed_vibe_up = false;
+    bool save_vibe_up = false;
     bool showed_ffd_fg = false;
-    bool showed_input = true;
-    bool showed_output = true;
-    bool showed_res_fg = false;
+    bool save_ffd_fg = false;
+    bool showed_input = false;
+    bool showed_output = false;
+    bool save_output = false;
+    bool showed_result = false;
 
     int part = 1;
 
@@ -60,8 +73,7 @@ private:
     bool msg_save = true;
     bool res_save = true;
 
-    std::string file_name_msg = "msglog.txt";
-    std::string file_name_res = "result.txt";
+    std::string file_name = "name";
 };
 
 #endif // SOLUTION_H
