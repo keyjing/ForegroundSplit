@@ -21,10 +21,6 @@ void Solution::Run()
     ofstream msgfile, resfile;
     if (msg_save)
     {
-        cout << "To create folder \"" + file_name + "\"" << endl;
-        string command;
-        command = "mkdir " + file_name;
-        system(command.c_str());
         msgfile = ofstream(file_name + "/msglog.txt", ios::out);
         if (!msgfile)
         {
